@@ -202,19 +202,24 @@ fun DbMeterScreen(
 
             Spacer(modifier = Modifier.height(14.dp))
 
+            // The chart takes the leftover height, so a short screen shrinks it
+            // instead of squashing the controls underneath.
             Card(
                 shape = RoundedCornerShape(20.dp),
                 colors = CardDefaults.cardColors(containerColor = CardBackground),
                 elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
             ) {
                 DbChart(
                     points = chartPoints,
-                    modifier = Modifier.padding(16.dp)
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp)
                 )
             }
 
-            Spacer(modifier = Modifier.weight(1f))
             Spacer(modifier = Modifier.height(14.dp))
 
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -269,22 +274,22 @@ private fun GaugeCard(currentDb: Float) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 20.dp, bottom = 20.dp, start = 16.dp, end = 16.dp),
+                .padding(top = 14.dp, bottom = 16.dp, start = 16.dp, end = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            DbGauge(value = currentDb, modifier = Modifier.fillMaxWidth())
-            Spacer(modifier = Modifier.height(4.dp))
+            DbGauge(value = currentDb, modifier = Modifier.fillMaxWidth(0.82f))
+            Spacer(modifier = Modifier.height(2.dp))
             Row(verticalAlignment = Alignment.Bottom) {
                 Text(
                     text = "%.0f".format(currentDb),
-                    fontSize = 44.sp,
+                    fontSize = 40.sp,
                     fontWeight = FontWeight.Bold,
                     color = TextPrimary
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text = "dB",
-                    fontSize = 22.sp,
+                    fontSize = 20.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = TextPrimary,
                     modifier = Modifier.padding(bottom = 5.dp)

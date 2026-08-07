@@ -73,7 +73,10 @@ fun DbGauge(
     val minorTickColor = GaugeTrackMinor
     val labelColor = TextSecondary.toArgb()
 
-    Box(modifier = modifier.fillMaxWidth()) {
+    // The arc geometry is derived from the canvas width, and the 1.75 ratio is
+    // the flattest the top semicircle fits in, so shrink the gauge by giving it
+    // less width rather than by squashing the aspect ratio.
+    Box(modifier = modifier) {
         Canvas(
             modifier = Modifier
                 .fillMaxWidth()

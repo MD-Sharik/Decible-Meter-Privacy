@@ -2,8 +2,7 @@ package com.sharik.dbmeter.ui
 
 import android.graphics.Paint
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -38,11 +37,9 @@ fun DbChart(
     val greenArgb = ChartGreen
     val purpleArgb = ChartPurple
 
-    Canvas(
-        modifier = modifier
-            .fillMaxWidth()
-            .aspectRatio(1.7f)
-    ) {
+    // Fills whatever the caller gives it: the chart is the part of the screen
+    // that flexes, so the controls below it always keep their full height.
+    Canvas(modifier = modifier.fillMaxSize()) {
         val leftPadding = size.width * 0.09f
         val bottomPadding = size.height * 0.1f
         val plotWidth = size.width - leftPadding
