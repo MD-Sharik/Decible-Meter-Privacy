@@ -1,6 +1,7 @@
 package com.sharik.dbmeter
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.os.Bundle
@@ -51,6 +52,8 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.ads.MobileAds
 import com.sharik.dbmeter.ui.DbChart
 import com.sharik.dbmeter.ui.DbGauge
+import com.sharik.dbmeter.ui.CalibrateChip
+import com.sharik.dbmeter.ui.CalibrationDialog
 import com.sharik.dbmeter.ui.NativeAdCard
 import com.sharik.dbmeter.ui.ReferenceChartDialog
 import com.sharik.dbmeter.ui.ReferenceChip
@@ -67,6 +70,8 @@ import kotlinx.coroutines.launch
 
 private const val WINDOW_SECONDS = 15f
 private const val POLL_INTERVAL_MS = 200L
+private const val PREFS_NAME = "dbmeter"
+private const val KEY_CALIBRATION = "calibration_adjustment"
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -90,7 +95,22 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun DbMeterApp() {
     val context = LocalContext.current
-    val soundMeter = remember { SoundMeter() }
+    val prefs = remember {
+        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    }
+
+    // Trim the user has dialled in, on top of SoundMeter's default offset.
+    var calibration by remember {
+        mutableFloatStateOf(prefs.getFloat(KEY_CALIBRATION, 0f))
+    }
+    val soundMeter = remember {
+        SoundMeter(SoundMeter.DEFAULT_CALIBRATION_OFFSET + calibration)
+    }
+    val onCalibrationChange: (Float) -> Unit = { value ->
+        calibration = value
+        soundMeter.calibrationOffset = SoundMeter.DEFAULT_CALIBRATION_OFFSET + value
+        prefs.edit().putFloat(KEY_CALIBRATION, value).apply()
+    }
 
     var hasPermission by remember {
         mutableStateOf(
@@ -139,10 +159,14 @@ fun DbMeterApp() {
             val startClock = SystemClock.elapsedRealtime()
             try {
                 while (isRunning) {
-                    val db = soundMeter.readDecibel().toFloat()
-                    currentDb = db
+                    val db = soundMeter.readDecibel()?.toFloat()
                     elapsedSeconds = baseElapsed + (SystemClock.elapsedRealtime() - startClock) / 1000f
-                    readings.add(elapsedSeconds to db)
+                    // Reads with no audio behind them are dropped, not recorded
+                    // as 0 dB -- that is what used to pin MIN at zero.
+                    if (db != null) {
+                        currentDb = db
+                        readings.add(elapsedSeconds to db)
+                    }
                     delay(POLL_INTERVAL_MS)
                 }
             } finally {
@@ -162,6 +186,8 @@ fun DbMeterApp() {
         avgDb = avgDb,
         maxDb = maxDb,
         chartPoints = windowPoints,
+        calibration = calibration,
+        onCalibrationChange = onCalibrationChange,
         onStart = onStart,
         onStop = onStop,
         onReset = onReset
@@ -175,11 +201,14 @@ fun DbMeterScreen(
     avgDb: Float,
     maxDb: Float,
     chartPoints: List<Pair<Float, Float>>,
+    calibration: Float,
+    onCalibrationChange: (Float) -> Unit,
     onStart: () -> Unit,
     onStop: () -> Unit,
     onReset: () -> Unit
 ) {
     var showReference by remember { mutableStateOf(false) }
+    var showCalibration by remember { mutableStateOf(false) }
     val isLandscape =
         LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
 
@@ -187,6 +216,14 @@ fun DbMeterScreen(
         ReferenceChartDialog(
             currentDb = currentDb,
             onDismiss = { showReference = false }
+        )
+    }
+    if (showCalibration) {
+        CalibrationDialog(
+            currentDb = currentDb,
+            adjustment = calibration,
+            onAdjustmentChange = onCalibrationChange,
+            onDismiss = { showCalibration = false }
         )
     }
 
@@ -217,6 +254,7 @@ fun DbMeterScreen(
                 onStop = onStop,
                 onReset = onReset,
                 onReferenceClick = { showReference = true },
+                onCalibrateClick = { showCalibration = true },
                 modifier = contentModifier
             )
         } else {
@@ -230,6 +268,7 @@ fun DbMeterScreen(
                 onStop = onStop,
                 onReset = onReset,
                 onReferenceClick = { showReference = true },
+                onCalibrateClick = { showCalibration = true },
                 modifier = contentModifier
             )
         }
@@ -247,6 +286,7 @@ private fun PortraitContent(
     onStop: () -> Unit,
     onReset: () -> Unit,
     onReferenceClick: () -> Unit,
+    onCalibrateClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
@@ -254,7 +294,8 @@ private fun PortraitContent(
             currentDb = currentDb,
             gaugeWidthFraction = 0.82f,
             compact = false,
-            onReferenceClick = onReferenceClick
+            onReferenceClick = onReferenceClick,
+            onCalibrateClick = onCalibrateClick
         )
 
         Spacer(modifier = Modifier.height(14.dp))
@@ -295,6 +336,7 @@ private fun LandscapeContent(
     onStop: () -> Unit,
     onReset: () -> Unit,
     onReferenceClick: () -> Unit,
+    onCalibrateClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -312,7 +354,8 @@ private fun LandscapeContent(
                 currentDb = currentDb,
                 gaugeWidthFraction = 0.58f,
                 compact = true,
-                onReferenceClick = onReferenceClick
+                onReferenceClick = onReferenceClick,
+                onCalibrateClick = onCalibrateClick
             )
         }
 
@@ -421,7 +464,8 @@ private fun GaugeCard(
     currentDb: Float,
     gaugeWidthFraction: Float,
     compact: Boolean,
-    onReferenceClick: () -> Unit
+    onReferenceClick: () -> Unit,
+    onCalibrateClick: () -> Unit
 ) {
     Card(
         shape = RoundedCornerShape(20.dp),
@@ -459,7 +503,10 @@ private fun GaugeCard(
                 )
             }
             Spacer(modifier = Modifier.height(6.dp))
-            ReferenceChip(currentDb = currentDb, onClick = onReferenceClick)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                ReferenceChip(currentDb = currentDb, onClick = onReferenceClick)
+                CalibrateChip(onClick = onCalibrateClick)
+            }
         }
     }
 }
