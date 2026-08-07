@@ -14,6 +14,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
+        android:minHeight="68dp"
         android:padding="12dp">
 
         <ImageView
@@ -79,7 +80,9 @@
             android:layout_height="wrap_content"
             android:background="@drawable/bg_ad_cta"
             android:ellipsize="end"
+            android:gravity="center"
             android:maxLines="1"
+            android:maxWidth="132dp"
             android:paddingStart="16dp"
             android:paddingTop="9dp"
             android:paddingEnd="16dp"

@@ -173,7 +173,17 @@ fun DbMeterScreen(
     onStop: () -> Unit,
     onReset: () -> Unit
 ) {
-    Scaffold(containerColor = ScreenBackground) { innerPadding ->
+    Scaffold(
+        containerColor = ScreenBackground,
+        // The ad lives in the bottom bar so it is measured before the content
+        // column. Inside the column it was the last child, so on a full screen
+        // it got whatever height was left over -- which was not enough.
+        bottomBar = {
+            NativeAdCard(
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 12.dp)
+            )
+        }
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -244,10 +254,6 @@ fun DbMeterScreen(
                     Text("Reset", fontWeight = FontWeight.SemiBold)
                 }
             }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            NativeAdCard()
         }
     }
 }
