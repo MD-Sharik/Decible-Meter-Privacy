@@ -12,14 +12,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import com.sharik.dbmeter.ui.theme.GaugeTrack
 import com.sharik.dbmeter.ui.theme.GaugeTrackMinor
-import com.sharik.dbmeter.ui.theme.NeedleGreen
+import com.sharik.dbmeter.ui.theme.LevelDanger
+import com.sharik.dbmeter.ui.theme.LevelLoud
+import com.sharik.dbmeter.ui.theme.LevelModerate
+import com.sharik.dbmeter.ui.theme.LevelQuiet
+import com.sharik.dbmeter.ui.theme.LevelVeryLoud
 import com.sharik.dbmeter.ui.theme.TextSecondary
 import kotlin.math.cos
 import kotlin.math.sin
@@ -28,6 +34,29 @@ private const val MIN_VALUE = 0f
 private const val MAX_VALUE = 120f
 private const val MAJOR_STEP = 20f
 private const val MINOR_STEP = 4f
+
+// The level stripe is drawn as a run of short arcs, each a solid colour, so the
+// ramp is smooth without a sweep gradient's seam at the 3 o'clock wrap point.
+private const val STRIPE_SEGMENTS = 96
+
+private val LevelRamp = listOf(
+    0.00f to LevelQuiet,
+    0.35f to LevelModerate,
+    0.55f to LevelLoud,
+    0.75f to LevelVeryLoud,
+    1.00f to LevelDanger
+)
+
+/** Colour at [fraction] (0..1) along the gauge, ramping green -> red. */
+fun levelColor(fraction: Float): Color {
+    val f = fraction.coerceIn(0f, 1f)
+    for (i in 0 until LevelRamp.lastIndex) {
+        val (start, startColor) = LevelRamp[i]
+        val (end, endColor) = LevelRamp[i + 1]
+        if (f <= end) return lerp(startColor, endColor, (f - start) / (end - start))
+    }
+    return LevelRamp.last().second
+}
 
 @Composable
 fun DbGauge(
@@ -42,7 +71,6 @@ fun DbGauge(
 
     val trackColor = GaugeTrack
     val minorTickColor = GaugeTrackMinor
-    val needleColor = NeedleGreen
     val labelColor = TextSecondary.toArgb()
 
     Box(modifier = modifier.fillMaxWidth()) {
@@ -57,16 +85,42 @@ fun DbGauge(
             val outerRadius = (w / 2f) - strokeWidth
             val center = Offset(w / 2f, h * 0.86f)
 
+            val arcTopLeft = Offset(center.x - outerRadius, center.y - outerRadius)
+            val arcSize = Size(outerRadius * 2, outerRadius * 2)
+
             // background track arc (top semicircle)
             drawArc(
                 color = trackColor,
                 startAngle = 180f,
                 sweepAngle = 180f,
                 useCenter = false,
-                topLeft = Offset(center.x - outerRadius, center.y - outerRadius),
-                size = androidx.compose.ui.geometry.Size(outerRadius * 2, outerRadius * 2),
+                topLeft = arcTopLeft,
+                size = arcSize,
                 style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
             )
+
+            // level stripe: fills in proportion to the reading, green -> red
+            val level = (animatedValue - MIN_VALUE) / (MAX_VALUE - MIN_VALUE)
+            if (level > 0f) {
+                val segments = (level * STRIPE_SEGMENTS).toInt().coerceAtLeast(1)
+                val segmentSweep = (level * 180f) / segments
+                for (i in 0 until segments) {
+                    val isLast = i == segments - 1
+                    drawArc(
+                        color = levelColor(level * (i + 0.5f) / segments),
+                        startAngle = 180f + i * segmentSweep,
+                        // overlap neighbours slightly so no hairline shows between segments
+                        sweepAngle = if (isLast) segmentSweep else segmentSweep + 0.4f,
+                        useCenter = false,
+                        topLeft = arcTopLeft,
+                        size = arcSize,
+                        style = Stroke(
+                            width = strokeWidth,
+                            cap = if (isLast) StrokeCap.Round else StrokeCap.Butt
+                        )
+                    )
+                }
+            }
 
             // tick marks
             var tickValue = MIN_VALUE
@@ -110,7 +164,8 @@ fun DbGauge(
                 drawContext.canvas.nativeCanvas.drawText(labelValue.toInt().toString(), lx, ly, paint)
             }
 
-            // needle
+            // needle, tinted to match the level it is pointing at
+            val needleColor = levelColor(level)
             val needleAngleDeg = 180f + (animatedValue / MAX_VALUE) * 180f
             val needleAngleRad = Math.toRadians(needleAngleDeg.toDouble())
             val needleLength = outerRadius * 0.72f

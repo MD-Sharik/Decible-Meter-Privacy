@@ -43,6 +43,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
+import com.google.android.gms.ads.MobileAds
+import com.sharik.dbmeter.ui.AdBanner
 import com.sharik.dbmeter.ui.DbChart
 import com.sharik.dbmeter.ui.DbGauge
 import com.sharik.dbmeter.ui.theme.ButtonPrimary
@@ -52,7 +55,9 @@ import com.sharik.dbmeter.ui.theme.DbMeterTheme
 import com.sharik.dbmeter.ui.theme.ScreenBackground
 import com.sharik.dbmeter.ui.theme.TextPrimary
 import com.sharik.dbmeter.ui.theme.TextSecondary
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 private const val WINDOW_SECONDS = 15f
 private const val POLL_INTERVAL_MS = 200L
@@ -60,6 +65,12 @@ private const val POLL_INTERVAL_MS = 200L
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Ads SDK startup touches disk and network, so keep it off the main thread.
+        lifecycleScope.launch(Dispatchers.IO) {
+            MobileAds.initialize(this@MainActivity)
+        }
+
         setContent {
             DbMeterTheme {
                 Surface(color = ScreenBackground) {
@@ -233,6 +244,10 @@ fun DbMeterScreen(
                     Text("Reset", fontWeight = FontWeight.SemiBold)
                 }
             }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            AdBanner()
         }
     }
 }

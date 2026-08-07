@@ -13,6 +13,13 @@ val GaugeTrack = Color(0xFFD9D9DE)
 val GaugeTrackMinor = Color(0xFFC7C7CC)
 val NeedleGreen = Color(0xFF8DD426)
 
+// Loudness ramp for the gauge stripe, quiet -> painful.
+val LevelQuiet = Color(0xFF2ECC40)
+val LevelModerate = Color(0xFFA8DB1E)
+val LevelLoud = Color(0xFFFFC300)
+val LevelVeryLoud = Color(0xFFFF8A00)
+val LevelDanger = Color(0xFFFF3B30)
+
 val ChartGridLine = Color(0xFFE5E5EA)
 val ChartGreen = Color(0xFF4CD137)
 val ChartPurple = Color(0xFF6C5DD3)
