@@ -2,6 +2,7 @@ package com.sharik.dbmeter
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.os.Bundle
 import android.os.SystemClock
 import androidx.activity.ComponentActivity
@@ -17,7 +18,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -37,6 +40,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -48,6 +52,8 @@ import com.google.android.gms.ads.MobileAds
 import com.sharik.dbmeter.ui.DbChart
 import com.sharik.dbmeter.ui.DbGauge
 import com.sharik.dbmeter.ui.NativeAdCard
+import com.sharik.dbmeter.ui.ReferenceChartDialog
+import com.sharik.dbmeter.ui.ReferenceChip
 import com.sharik.dbmeter.ui.theme.ButtonPrimary
 import com.sharik.dbmeter.ui.theme.ButtonSecondaryBorder
 import com.sharik.dbmeter.ui.theme.CardBackground
@@ -173,6 +179,17 @@ fun DbMeterScreen(
     onStop: () -> Unit,
     onReset: () -> Unit
 ) {
+    var showReference by remember { mutableStateOf(false) }
+    val isLandscape =
+        LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
+
+    if (showReference) {
+        ReferenceChartDialog(
+            currentDb = currentDb,
+            onDismiss = { showReference = false }
+        )
+    }
+
     Scaffold(
         containerColor = ScreenBackground,
         // The ad lives in the bottom bar so it is measured before the content
@@ -184,87 +201,228 @@ fun DbMeterScreen(
             )
         }
     ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(horizontal = 16.dp, vertical = 20.dp)
-        ) {
-            GaugeCard(currentDb = currentDb)
+        val contentModifier = Modifier
+            .fillMaxSize()
+            .padding(innerPadding)
+            .padding(horizontal = 16.dp, vertical = if (isLandscape) 10.dp else 20.dp)
 
-            Spacer(modifier = Modifier.height(14.dp))
-
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                StatCard("%.0f dB".format(minDb), "MIN", Modifier.weight(1f))
-                StatCard("%.0f dB".format(avgDb), "AVG", Modifier.weight(1f))
-                StatCard("%.0f dB".format(maxDb), "MAX", Modifier.weight(1f))
-            }
-
-            Spacer(modifier = Modifier.height(14.dp))
-
-            // The chart takes the leftover height, so a short screen shrinks it
-            // instead of squashing the controls underneath.
-            Card(
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = CardBackground),
-                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-            ) {
-                DbChart(
-                    points = chartPoints,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(14.dp))
-
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Button(
-                    onClick = onStart,
-                    shape = RoundedCornerShape(50),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = ButtonPrimary,
-                        contentColor = Color.White
-                    ),
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(52.dp)
-                ) {
-                    Text("Start", fontWeight = FontWeight.SemiBold)
-                }
-                OutlinedButton(
-                    onClick = onStop,
-                    shape = RoundedCornerShape(50),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = TextPrimary),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, ButtonSecondaryBorder),
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(52.dp)
-                ) {
-                    Text("Stop", fontWeight = FontWeight.SemiBold)
-                }
-                OutlinedButton(
-                    onClick = onReset,
-                    shape = RoundedCornerShape(50),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = TextPrimary),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, ButtonSecondaryBorder),
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(52.dp)
-                ) {
-                    Text("Reset", fontWeight = FontWeight.SemiBold)
-                }
-            }
+        if (isLandscape) {
+            LandscapeContent(
+                currentDb = currentDb,
+                minDb = minDb,
+                avgDb = avgDb,
+                maxDb = maxDb,
+                chartPoints = chartPoints,
+                onStart = onStart,
+                onStop = onStop,
+                onReset = onReset,
+                onReferenceClick = { showReference = true },
+                modifier = contentModifier
+            )
+        } else {
+            PortraitContent(
+                currentDb = currentDb,
+                minDb = minDb,
+                avgDb = avgDb,
+                maxDb = maxDb,
+                chartPoints = chartPoints,
+                onStart = onStart,
+                onStop = onStop,
+                onReset = onReset,
+                onReferenceClick = { showReference = true },
+                modifier = contentModifier
+            )
         }
     }
 }
 
 @Composable
-private fun GaugeCard(currentDb: Float) {
+private fun PortraitContent(
+    currentDb: Float,
+    minDb: Float,
+    avgDb: Float,
+    maxDb: Float,
+    chartPoints: List<Pair<Float, Float>>,
+    onStart: () -> Unit,
+    onStop: () -> Unit,
+    onReset: () -> Unit,
+    onReferenceClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier) {
+        GaugeCard(
+            currentDb = currentDb,
+            gaugeWidthFraction = 0.82f,
+            compact = false,
+            onReferenceClick = onReferenceClick
+        )
+
+        Spacer(modifier = Modifier.height(14.dp))
+
+        StatsRow(minDb = minDb, avgDb = avgDb, maxDb = maxDb, compact = false)
+
+        Spacer(modifier = Modifier.height(14.dp))
+
+        // The chart takes the leftover height, so a short screen shrinks it
+        // instead of squashing the controls underneath.
+        ChartCard(
+            points = chartPoints,
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+        )
+
+        Spacer(modifier = Modifier.height(14.dp))
+
+        Controls(onStart = onStart, onStop = onStop, onReset = onReset, compact = false)
+    }
+}
+
+/**
+ * Landscape puts the dial on the left and gives the right column to the chart,
+ * which is what benefits from the extra width. Everything is tightened up: a
+ * phone on its side has roughly 300dp of usable height, and the ad takes a
+ * chunk of that.
+ */
+@Composable
+private fun LandscapeContent(
+    currentDb: Float,
+    minDb: Float,
+    avgDb: Float,
+    maxDb: Float,
+    chartPoints: List<Pair<Float, Float>>,
+    onStart: () -> Unit,
+    onStop: () -> Unit,
+    onReset: () -> Unit,
+    onReferenceClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        // Scrolls rather than clips if the dial still will not fit on a very
+        // short screen.
+        Column(
+            modifier = Modifier
+                .weight(0.9f)
+                .verticalScroll(rememberScrollState())
+        ) {
+            GaugeCard(
+                currentDb = currentDb,
+                gaugeWidthFraction = 0.58f,
+                compact = true,
+                onReferenceClick = onReferenceClick
+            )
+        }
+
+        Column(modifier = Modifier.weight(1.1f)) {
+            StatsRow(minDb = minDb, avgDb = avgDb, maxDb = maxDb, compact = true)
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            ChartCard(
+                points = chartPoints,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Controls(onStart = onStart, onStop = onStop, onReset = onReset, compact = true)
+        }
+    }
+}
+
+@Composable
+private fun StatsRow(
+    minDb: Float,
+    avgDb: Float,
+    maxDb: Float,
+    compact: Boolean
+) {
+    Row(horizontalArrangement = Arrangement.spacedBy(if (compact) 8.dp else 12.dp)) {
+        StatCard("%.0f dB".format(minDb), "MIN", compact, Modifier.weight(1f))
+        StatCard("%.0f dB".format(avgDb), "AVG", compact, Modifier.weight(1f))
+        StatCard("%.0f dB".format(maxDb), "MAX", compact, Modifier.weight(1f))
+    }
+}
+
+@Composable
+private fun ChartCard(
+    points: List<Pair<Float, Float>>,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = CardBackground),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        modifier = modifier
+    ) {
+        DbChart(
+            points = points,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        )
+    }
+}
+
+@Composable
+private fun Controls(
+    onStart: () -> Unit,
+    onStop: () -> Unit,
+    onReset: () -> Unit,
+    compact: Boolean
+) {
+    val buttonHeight = if (compact) 44.dp else 52.dp
+    Row(horizontalArrangement = Arrangement.spacedBy(if (compact) 8.dp else 12.dp)) {
+        Button(
+            onClick = onStart,
+            shape = RoundedCornerShape(50),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = ButtonPrimary,
+                contentColor = Color.White
+            ),
+            modifier = Modifier
+                .weight(1f)
+                .height(buttonHeight)
+        ) {
+            Text("Start", fontWeight = FontWeight.SemiBold)
+        }
+        OutlinedButton(
+            onClick = onStop,
+            shape = RoundedCornerShape(50),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = TextPrimary),
+            border = androidx.compose.foundation.BorderStroke(1.dp, ButtonSecondaryBorder),
+            modifier = Modifier
+                .weight(1f)
+                .height(buttonHeight)
+        ) {
+            Text("Stop", fontWeight = FontWeight.SemiBold)
+        }
+        OutlinedButton(
+            onClick = onReset,
+            shape = RoundedCornerShape(50),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = TextPrimary),
+            border = androidx.compose.foundation.BorderStroke(1.dp, ButtonSecondaryBorder),
+            modifier = Modifier
+                .weight(1f)
+                .height(buttonHeight)
+        ) {
+            Text("Reset", fontWeight = FontWeight.SemiBold)
+        }
+    }
+}
+
+@Composable
+private fun GaugeCard(
+    currentDb: Float,
+    gaugeWidthFraction: Float,
+    compact: Boolean,
+    onReferenceClick: () -> Unit
+) {
     Card(
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = CardBackground),
@@ -274,33 +432,45 @@ private fun GaugeCard(currentDb: Float) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 14.dp, bottom = 16.dp, start = 16.dp, end = 16.dp),
+                .padding(
+                    top = if (compact) 10.dp else 14.dp,
+                    bottom = if (compact) 12.dp else 16.dp,
+                    start = 16.dp,
+                    end = 16.dp
+                ),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            DbGauge(value = currentDb, modifier = Modifier.fillMaxWidth(0.82f))
+            DbGauge(value = currentDb, modifier = Modifier.fillMaxWidth(gaugeWidthFraction))
             Spacer(modifier = Modifier.height(2.dp))
             Row(verticalAlignment = Alignment.Bottom) {
                 Text(
                     text = "%.0f".format(currentDb),
-                    fontSize = 40.sp,
+                    fontSize = if (compact) 28.sp else 40.sp,
                     fontWeight = FontWeight.Bold,
                     color = TextPrimary
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text = "dB",
-                    fontSize = 20.sp,
+                    fontSize = if (compact) 15.sp else 20.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = TextPrimary,
-                    modifier = Modifier.padding(bottom = 5.dp)
+                    modifier = Modifier.padding(bottom = if (compact) 3.dp else 5.dp)
                 )
             }
+            Spacer(modifier = Modifier.height(6.dp))
+            ReferenceChip(currentDb = currentDb, onClick = onReferenceClick)
         }
     }
 }
 
 @Composable
-private fun StatCard(value: String, label: String, modifier: Modifier = Modifier) {
+private fun StatCard(
+    value: String,
+    label: String,
+    compact: Boolean,
+    modifier: Modifier = Modifier
+) {
     Card(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = CardBackground),
@@ -310,19 +480,19 @@ private fun StatCard(value: String, label: String, modifier: Modifier = Modifier
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 14.dp),
+                .padding(vertical = if (compact) 8.dp else 14.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = value,
-                fontSize = 17.sp,
+                fontSize = if (compact) 15.sp else 17.sp,
                 fontWeight = FontWeight.Bold,
                 color = TextPrimary
             )
             Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = label,
-                fontSize = 11.sp,
+                fontSize = if (compact) 10.sp else 11.sp,
                 fontWeight = FontWeight.Medium,
                 color = TextSecondary,
                 textAlign = TextAlign.Center
