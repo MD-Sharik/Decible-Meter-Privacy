@@ -7,6 +7,7 @@ import android.content.res.Configuration
 import android.os.Bundle
 import android.os.SystemClock
 import androidx.activity.ComponentActivity
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.compose.setContent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -69,6 +71,10 @@ private const val KEY_CALIBRATION = "calibration_adjustment"
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Android 15 (targetSdk 35) draws every app edge to edge and ignores
+        // android:statusBarColor, so opt in explicitly and let the Scaffold's
+        // window insets place the content.
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
         // Ads SDK startup touches disk and network, so keep it off the main thread.
@@ -227,8 +233,12 @@ fun DbMeterScreen(
         // column. Inside the column it was the last child, so on a full screen
         // it got whatever height was left over -- which was not enough.
         bottomBar = {
+            // Scaffold pads its body content for window insets but not a custom
+            // bottom bar, which would otherwise sit under the navigation bar.
             NativeAdCard(
-                modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 12.dp)
+                modifier = Modifier
+                    .navigationBarsPadding()
+                    .padding(start = 16.dp, end = 16.dp, bottom = 12.dp)
             )
         }
     ) { innerPadding ->

@@ -6,14 +6,16 @@ plugins {
 
 android {
     namespace = "com.sharik.dbmeter"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.sharik.dbmeter"
         minSdk = 26
-        targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        targetSdk = 35
+        // Bundle 1 is already uploaded to the draft release; Play will not
+        // accept the same version code twice.
+        versionCode = 2
+        versionName = "1.0.1"
     }
 
     buildTypes {
