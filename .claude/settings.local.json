@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell($env:JAVA_HOME=\"C:\\\\Program Files\\\\Android\\\\Android Studio\\\\jbr\"; & \"C:\\\\Users\\\\sharik\\\\.gradle\\\\wrapper\\\\dists\\\\gradle-8.7-bin\\\\bhs2wmbdwecv87pi65oeuq5iu\\\\gradle-8.7\\\\bin\\\\gradle.bat\" -p \"C:\\\\Users\\\\sharik\\\\Desktop\\\\MobileApps\\\\New folder\" :app:processDebugResources --console=plain)",
+      "PowerShell(Get-ChildItem \"C:\\\\Program Files\\\\Java\",\"C:\\\\Program Files\\\\Eclipse Adoptium\",\"$env:LOCALAPPDATA\\\\Programs\\\\Eclipse Adoptium\",\"C:\\\\Program Files\\\\Microsoft\" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName; \"--- studio jbr version ---\"; & \"C:\\\\Program Files\\\\Android\\\\Android Studio\\\\jbr\\\\bin\\\\java.exe\" -version)",
+      "PowerShell($env:JAVA_HOME=\"C:\\\\Users\\\\sharik\\\\.jdks\\\\jbr-21.0.11\"; & \"C:\\\\Users\\\\sharik\\\\.gradle\\\\wrapper\\\\dists\\\\gradle-8.7-bin\\\\bhs2wmbdwecv87pi65oeuq5iu\\\\gradle-8.7\\\\bin\\\\gradle.bat\" -p \"C:\\\\Users\\\\sharik\\\\Desktop\\\\MobileApps\\\\New folder\" :app:assembleDebug --console=plain)"
+    ]
+  }
+}
