@@ -1,12 +1,12 @@
 <resources>
     <string name="app_name">Decibel Meter</string>
+    <string name="ad_badge_label">Ad</string>
 
     <!--
-      Google's official AdMob *test* IDs. Serving real ads against a live app
-      you are testing yourself violates AdMob policy, so keep these until
-      release, then swap in the IDs from your own AdMob account.
-      https://developers.google.com/admob/android/test-ads
+      Live AdMob ids. The debug build type overrides both with Google's test
+      ids (see src/debug/res/values/admob_ids.xml) so development traffic never
+      hits the real unit.
     -->
-    <string name="admob_app_id" translatable="false">ca-app-pub-3940256099942544~3347511713</string>
-    <string name="admob_banner_unit_id" translatable="false">ca-app-pub-3940256099942544/6300978111</string>
+    <string name="admob_app_id" translatable="false">ca-app-pub-2408586648009670~5414558875</string>
+    <string name="admob_native_unit_id" translatable="false">ca-app-pub-2408586648009670/8447916328</string>
 </resources>

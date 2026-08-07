@@ -45,9 +45,9 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.ads.MobileAds
-import com.sharik.dbmeter.ui.AdBanner
 import com.sharik.dbmeter.ui.DbChart
 import com.sharik.dbmeter.ui.DbGauge
+import com.sharik.dbmeter.ui.NativeAdCard
 import com.sharik.dbmeter.ui.theme.ButtonPrimary
 import com.sharik.dbmeter.ui.theme.ButtonSecondaryBorder
 import com.sharik.dbmeter.ui.theme.CardBackground
@@ -247,7 +247,7 @@ fun DbMeterScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            AdBanner()
+            NativeAdCard()
         }
     }
 }
