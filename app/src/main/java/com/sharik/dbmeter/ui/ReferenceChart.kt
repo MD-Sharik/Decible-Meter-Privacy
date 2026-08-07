@@ -26,10 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import com.sharik.dbmeter.ui.theme.CardBackground
-import com.sharik.dbmeter.ui.theme.ScreenBackground
-import com.sharik.dbmeter.ui.theme.TextPrimary
-import com.sharik.dbmeter.ui.theme.TextSecondary
+import com.sharik.dbmeter.ui.theme.DbTheme
 
 /** A familiar sound at a given level. */
 data class SoundReference(val db: Int, val label: String)
@@ -70,7 +67,7 @@ fun ReferenceChip(
 
     Surface(
         shape = RoundedCornerShape(50),
-        color = ScreenBackground,
+        color = DbTheme.colors.chipBackground,
         modifier = modifier.clickable(onClick = onClick)
     ) {
         Row(
@@ -88,7 +85,7 @@ fun ReferenceChip(
                 text = label,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Medium,
-                color = TextPrimary
+                color = DbTheme.colors.textPrimary
             )
         }
     }
@@ -102,7 +99,7 @@ fun ReferenceChartDialog(
     Dialog(onDismissRequest = onDismiss) {
         Surface(
             shape = RoundedCornerShape(24.dp),
-            color = CardBackground
+            color = DbTheme.colors.cardBackground
         ) {
             Column(
                 modifier = Modifier
@@ -114,13 +111,13 @@ fun ReferenceChartDialog(
                     text = "%.1f dB".format(currentDb),
                     fontSize = 30.sp,
                     fontWeight = FontWeight.Bold,
-                    color = TextPrimary
+                    color = DbTheme.colors.textPrimary
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
                     text = "Reference Chart",
                     fontSize = 15.sp,
-                    color = TextSecondary
+                    color = DbTheme.colors.textSecondary
                 )
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -158,7 +155,7 @@ private fun ReferenceRow(reference: SoundReference) {
         Text(
             text = "${reference.db}dB : ${reference.label}",
             fontSize = 14.sp,
-            color = TextPrimary
+            color = DbTheme.colors.textPrimary
         )
     }
 }

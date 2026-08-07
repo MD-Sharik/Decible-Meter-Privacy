@@ -1,0 +1,14 @@
+<resources>
+    <!--
+      Window theme only: everything inside the activity is drawn by Compose.
+      This exists so the window background and status bar match before the
+      first frame, and so values-night can flip them.
+    -->
+    <style name="Theme.DbMeter" parent="@android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/screen_background</item>
+        <item name="android:statusBarColor">@color/screen_background</item>
+        <item name="android:navigationBarColor">@color/screen_background</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
+    </style>
+</resources>

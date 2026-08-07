@@ -28,7 +28,7 @@ import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.nativead.NativeAd
 import com.google.android.gms.ads.nativead.NativeAdView
 import com.sharik.dbmeter.R
-import com.sharik.dbmeter.ui.theme.CardBackground
+import com.sharik.dbmeter.ui.theme.DbTheme
 
 private const val TAG = "NativeAdCard"
 
@@ -80,7 +80,7 @@ fun NativeAdCard(modifier: Modifier = Modifier) {
 
     Card(
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = CardBackground),
+        colors = CardDefaults.cardColors(containerColor = DbTheme.colors.cardBackground),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
         modifier = modifier.fillMaxWidth()
     ) {

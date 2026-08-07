@@ -1,0 +1,9 @@
+<resources>
+    <style name="Theme.DbMeter" parent="@android:style/Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/screen_background</item>
+        <item name="android:statusBarColor">@color/screen_background</item>
+        <item name="android:navigationBarColor">@color/screen_background</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
+    </style>
+</resources>

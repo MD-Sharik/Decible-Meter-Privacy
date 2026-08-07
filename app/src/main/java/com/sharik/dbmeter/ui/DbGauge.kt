@@ -19,14 +19,12 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
-import com.sharik.dbmeter.ui.theme.GaugeTrack
-import com.sharik.dbmeter.ui.theme.GaugeTrackMinor
+import com.sharik.dbmeter.ui.theme.DbTheme
 import com.sharik.dbmeter.ui.theme.LevelDanger
 import com.sharik.dbmeter.ui.theme.LevelLoud
 import com.sharik.dbmeter.ui.theme.LevelModerate
 import com.sharik.dbmeter.ui.theme.LevelQuiet
 import com.sharik.dbmeter.ui.theme.LevelVeryLoud
-import com.sharik.dbmeter.ui.theme.TextSecondary
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -69,9 +67,10 @@ fun DbGauge(
         label = "needle"
     )
 
-    val trackColor = GaugeTrack
-    val minorTickColor = GaugeTrackMinor
-    val labelColor = TextSecondary.toArgb()
+    val trackColor = DbTheme.colors.gaugeTrack
+    val minorTickColor = DbTheme.colors.gaugeTrackMinor
+    val labelColor = DbTheme.colors.textSecondary.toArgb()
+    val hubColor = DbTheme.colors.needleHub
 
     // The arc geometry is derived from the canvas width, and the 1.75 ratio is
     // the flattest the top semicircle fits in, so shrink the gauge by giving it
@@ -189,7 +188,7 @@ fun DbGauge(
                 center = center
             )
             drawCircle(
-                color = Color.White,
+                color = hubColor,
                 radius = w * 0.01f,
                 center = center
             )

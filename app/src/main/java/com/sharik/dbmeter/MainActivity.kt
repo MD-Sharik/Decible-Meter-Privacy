@@ -1,4 +1,4 @@
-package com.sharik.dbmeter
+﻿package com.sharik.dbmeter
 
 import android.Manifest
 import android.content.Context
@@ -40,7 +40,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -57,13 +56,8 @@ import com.sharik.dbmeter.ui.CalibrationDialog
 import com.sharik.dbmeter.ui.NativeAdCard
 import com.sharik.dbmeter.ui.ReferenceChartDialog
 import com.sharik.dbmeter.ui.ReferenceChip
-import com.sharik.dbmeter.ui.theme.ButtonPrimary
-import com.sharik.dbmeter.ui.theme.ButtonSecondaryBorder
-import com.sharik.dbmeter.ui.theme.CardBackground
 import com.sharik.dbmeter.ui.theme.DbMeterTheme
-import com.sharik.dbmeter.ui.theme.ScreenBackground
-import com.sharik.dbmeter.ui.theme.TextPrimary
-import com.sharik.dbmeter.ui.theme.TextSecondary
+import com.sharik.dbmeter.ui.theme.DbTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -84,7 +78,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             DbMeterTheme {
-                Surface(color = ScreenBackground) {
+                Surface(color = DbTheme.colors.screenBackground) {
                     DbMeterApp()
                 }
             }
@@ -228,7 +222,7 @@ fun DbMeterScreen(
     }
 
     Scaffold(
-        containerColor = ScreenBackground,
+        containerColor = DbTheme.colors.screenBackground,
         // The ad lives in the bottom bar so it is measured before the content
         // column. Inside the column it was the last child, so on a full screen
         // it got whatever height was left over -- which was not enough.
@@ -399,7 +393,7 @@ private fun ChartCard(
 ) {
     Card(
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = CardBackground),
+        colors = CardDefaults.cardColors(containerColor = DbTheme.colors.cardBackground),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
         modifier = modifier
     ) {
@@ -425,8 +419,8 @@ private fun Controls(
             onClick = onStart,
             shape = RoundedCornerShape(50),
             colors = ButtonDefaults.buttonColors(
-                containerColor = ButtonPrimary,
-                contentColor = Color.White
+                containerColor = DbTheme.colors.buttonPrimary,
+                contentColor = DbTheme.colors.onButtonPrimary
             ),
             modifier = Modifier
                 .weight(1f)
@@ -437,8 +431,8 @@ private fun Controls(
         OutlinedButton(
             onClick = onStop,
             shape = RoundedCornerShape(50),
-            colors = ButtonDefaults.outlinedButtonColors(contentColor = TextPrimary),
-            border = androidx.compose.foundation.BorderStroke(1.dp, ButtonSecondaryBorder),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = DbTheme.colors.textPrimary),
+            border = androidx.compose.foundation.BorderStroke(1.dp, DbTheme.colors.buttonSecondaryBorder),
             modifier = Modifier
                 .weight(1f)
                 .height(buttonHeight)
@@ -448,8 +442,8 @@ private fun Controls(
         OutlinedButton(
             onClick = onReset,
             shape = RoundedCornerShape(50),
-            colors = ButtonDefaults.outlinedButtonColors(contentColor = TextPrimary),
-            border = androidx.compose.foundation.BorderStroke(1.dp, ButtonSecondaryBorder),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = DbTheme.colors.textPrimary),
+            border = androidx.compose.foundation.BorderStroke(1.dp, DbTheme.colors.buttonSecondaryBorder),
             modifier = Modifier
                 .weight(1f)
                 .height(buttonHeight)
@@ -469,7 +463,7 @@ private fun GaugeCard(
 ) {
     Card(
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = CardBackground),
+        colors = CardDefaults.cardColors(containerColor = DbTheme.colors.cardBackground),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -491,14 +485,14 @@ private fun GaugeCard(
                     text = "%.0f".format(currentDb),
                     fontSize = if (compact) 28.sp else 40.sp,
                     fontWeight = FontWeight.Bold,
-                    color = TextPrimary
+                    color = DbTheme.colors.textPrimary
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text = "dB",
                     fontSize = if (compact) 15.sp else 20.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = TextPrimary,
+                    color = DbTheme.colors.textPrimary,
                     modifier = Modifier.padding(bottom = if (compact) 3.dp else 5.dp)
                 )
             }
@@ -520,7 +514,7 @@ private fun StatCard(
 ) {
     Card(
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = CardBackground),
+        colors = CardDefaults.cardColors(containerColor = DbTheme.colors.cardBackground),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
         modifier = modifier
     ) {
@@ -534,14 +528,14 @@ private fun StatCard(
                 text = value,
                 fontSize = if (compact) 15.sp else 17.sp,
                 fontWeight = FontWeight.Bold,
-                color = TextPrimary
+                color = DbTheme.colors.textPrimary
             )
             Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = label,
                 fontSize = if (compact) 10.sp else 11.sp,
                 fontWeight = FontWeight.Medium,
-                color = TextSecondary,
+                color = DbTheme.colors.textSecondary,
                 textAlign = TextAlign.Center
             )
         }

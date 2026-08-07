@@ -1,7 +1,12 @@
 <resources>
-    <!-- Mirrors ui/theme/Color.kt for the view-based native ad layout. -->
+    <!-- Mirrors ui/theme/Color.kt for the view-based native ad layout and the
+         platform window theme. values-night holds the dark counterparts. -->
+    <color name="screen_background">#FFF0F0F3</color>
     <color name="text_primary">#FF1C1C1E</color>
     <color name="text_secondary">#FF8E8E93</color>
     <color name="button_primary">#FF1C1C1E</color>
+    <color name="ad_cta_text">#FFFFFFFF</color>
     <color name="ad_badge">#FFFFC300</color>
+    <!-- Always dark: the badge stays yellow in both themes. -->
+    <color name="ad_badge_text">#FF1C1C1E</color>
 </resources>

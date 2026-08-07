@@ -26,11 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.sharik.dbmeter.SoundMeter
-import com.sharik.dbmeter.ui.theme.ButtonPrimary
-import com.sharik.dbmeter.ui.theme.CardBackground
-import com.sharik.dbmeter.ui.theme.ScreenBackground
-import com.sharik.dbmeter.ui.theme.TextPrimary
-import com.sharik.dbmeter.ui.theme.TextSecondary
+import com.sharik.dbmeter.ui.theme.DbTheme
 
 /** Opens the [CalibrationDialog]. Sits beside the reference chip. */
 @Composable
@@ -40,13 +36,13 @@ fun CalibrateChip(
 ) {
     Surface(
         shape = RoundedCornerShape(50),
-        color = ScreenBackground,
+        color = DbTheme.colors.chipBackground,
         modifier = modifier.clickable(onClick = onClick)
     ) {
         Text(
             text = "Calibrate",
             fontSize = 12.sp,
-            color = TextSecondary,
+            color = DbTheme.colors.textSecondary,
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
         )
     }
@@ -70,7 +66,7 @@ fun CalibrationDialog(
     Dialog(onDismissRequest = onDismiss) {
         Surface(
             shape = RoundedCornerShape(24.dp),
-            color = CardBackground
+            color = DbTheme.colors.cardBackground
         ) {
             Column(
                 modifier = Modifier
@@ -82,13 +78,13 @@ fun CalibrationDialog(
                     text = "%.1f dB".format(currentDb),
                     fontSize = 30.sp,
                     fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-                    color = TextPrimary
+                    color = DbTheme.colors.textPrimary
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
                     text = "Calibration",
                     fontSize = 15.sp,
-                    color = TextSecondary
+                    color = DbTheme.colors.textSecondary
                 )
 
                 Spacer(modifier = Modifier.height(18.dp))
@@ -97,7 +93,7 @@ fun CalibrationDialog(
                     text = "%+.1f dB".format(adjustment),
                     fontSize = 20.sp,
                     fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
-                    color = TextPrimary
+                    color = DbTheme.colors.textPrimary
                 )
 
                 Slider(
@@ -107,8 +103,8 @@ fun CalibrationDialog(
                     // 0.5 dB detents across the whole range.
                     steps = 59,
                     colors = SliderDefaults.colors(
-                        thumbColor = ButtonPrimary,
-                        activeTrackColor = ButtonPrimary,
+                        thumbColor = DbTheme.colors.buttonPrimary,
+                        activeTrackColor = DbTheme.colors.buttonPrimary,
                         activeTickColor = Color.Transparent,
                         inactiveTickColor = Color.Transparent
                     ),
@@ -119,7 +115,7 @@ fun CalibrationDialog(
                     text = "Hold a meter you trust next to the phone and slide " +
                         "until the two readings agree. Saved for next time.",
                     fontSize = 12.sp,
-                    color = TextSecondary,
+                    color = DbTheme.colors.textSecondary,
                     textAlign = TextAlign.Center
                 )
 
@@ -133,14 +129,14 @@ fun CalibrationDialog(
                         onClick = { onAdjustmentChange(0f) },
                         modifier = Modifier.weight(1f)
                     ) {
-                        Text("Reset", color = TextSecondary)
+                        Text("Reset", color = DbTheme.colors.textSecondary)
                     }
                     Button(
                         onClick = onDismiss,
                         shape = RoundedCornerShape(50),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = ButtonPrimary,
-                            contentColor = Color.White
+                            containerColor = DbTheme.colors.buttonPrimary,
+                            contentColor = DbTheme.colors.onButtonPrimary
                         ),
                         modifier = Modifier.weight(1f)
                     ) {

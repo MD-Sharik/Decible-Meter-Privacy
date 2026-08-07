@@ -13,10 +13,7 @@ import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
-import com.sharik.dbmeter.ui.theme.ChartGreen
-import com.sharik.dbmeter.ui.theme.ChartGridLine
-import com.sharik.dbmeter.ui.theme.ChartPurple
-import com.sharik.dbmeter.ui.theme.TextSecondary
+import com.sharik.dbmeter.ui.theme.DbTheme
 
 private const val Y_MAX = 120f
 private const val WINDOW_SECONDS = 15f
@@ -32,10 +29,10 @@ fun DbChart(
     points: List<Pair<Float, Float>>,
     modifier: Modifier = Modifier
 ) {
-    val gridColor = ChartGridLine
-    val labelColor = TextSecondary.toArgb()
-    val greenArgb = ChartGreen
-    val purpleArgb = ChartPurple
+    val gridColor = DbTheme.colors.chartGridLine
+    val labelColor = DbTheme.colors.textSecondary.toArgb()
+    val greenArgb = DbTheme.colors.chartLineStart
+    val purpleArgb = DbTheme.colors.chartLineEnd
 
     // Fills whatever the caller gives it: the chart is the part of the screen
     // that flexes, so the controls below it always keep their full height.
