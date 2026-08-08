@@ -51,10 +51,16 @@
     --on-surface-muted:   #99a1b3;
     --on-brand:           #ffffff;
 
-    --brand-pink:   #ff3b8e;
-    --brand-violet: #7b6cff;
-    --brand-blue:   #56aeff;
-    --brand-grad: linear-gradient(100deg, var(--brand-pink), var(--brand-violet) 55%, var(--brand-blue));
+    /* ---- brand, sampled from the launcher artwork ---- */
+    --brand-amber:   #febe05;
+    --brand-orange:  #ff922d;
+    --brand-pink:    #fa3f94;
+    --brand-magenta: #fc62c7;
+    --brand-blue:    #3b4ff0;   /* the icon's electric blue */
+    --brand-link:    #6fa8ff;   /* lifted for 4.5:1 on the dark surface */
+    --brand-grad: linear-gradient(100deg, var(--brand-pink) 0%, #c74be0 46%, var(--brand-blue) 100%);
+    --brand-grad-warm: linear-gradient(100deg, var(--brand-amber) 0%, var(--brand-orange) 22%,
+                                       var(--brand-pink) 58%, var(--brand-blue) 100%);
     --focus: #8fb8ff;
 
     /* ---- loudness ramp, shared with the app ---- */
@@ -64,15 +70,17 @@
     --lvl-vloud:    #ff8a00;
     --lvl-danger:   #ff3b30;
 
-    /* ---- the phone mock reproduces the app's light theme ---- */
-    --app-bg:    #f0f0f3;
-    --app-card:  #ffffff;
-    --app-text:  #1c1c1e;
-    --app-muted: #8e8e93;
-    --app-track: #d9d9de;
-    --app-tick:  #c7c7cc;
-    --app-grid:  #e5e5ea;
-    --app-line:  #e2e2e6;
+    /* ---- the phone mock reproduces the app's DARK theme, value for value
+           from ui/theme/Color.kt, so the site and the app are one thing ---- */
+    --app-bg:    #060a17;
+    --app-card:  #111725;
+    --app-text:  #f2f4f8;
+    --app-muted: #8b92a3;
+    --app-track: #232b3c;
+    --app-tick:  #39424f;
+    --app-grid:  #1c2331;
+    --app-line:  #2a3242;
+    --app-chip:  #1a2130;
 
     /* ---- 4px spacing scale ---- */
     --s1: 4px;  --s2: 8px;  --s3: 12px; --s4: 16px;
@@ -115,7 +123,7 @@
   h3 { font-size: var(--t-lg); font-weight: 650; letter-spacing: -.01em; }
   p  { margin: 0 0 var(--s4); max-width: 68ch; }
 
-  a { color: var(--brand-blue); }
+  a { color: var(--brand-link); }
 
   /* Visible focus on every interactive element (never removed). */
   :focus-visible {
@@ -136,10 +144,11 @@
 
   /* Solid brand colour first, so the word is never invisible if the browser
      does not support clipping a background to text. */
-  .grad { color: var(--brand-violet); }
+  .grad { color: var(--brand-magenta); }
   @supports ((-webkit-background-clip: text) or (background-clip: text)) {
     .grad {
-      background: var(--brand-grad);
+      /* Warm-to-cool, the same sweep the icon makes. */
+      background: var(--brand-grad-warm);
       -webkit-background-clip: text; background-clip: text; color: transparent;
     }
   }
@@ -179,19 +188,29 @@
     text-decoration: none; font-weight: 650; font-size: var(--t-sm);
     border-radius: var(--r-pill); white-space: nowrap; cursor: pointer;
     touch-action: manipulation;
-    transition: transform var(--dur) var(--ease), filter var(--dur) var(--ease);
+    box-shadow: 0 6px 22px rgba(250, 63, 148, .28), 0 2px 8px rgba(59, 79, 240, .22);
+    transition: transform var(--dur) var(--ease), filter var(--dur) var(--ease),
+                box-shadow var(--dur) var(--ease);
   }
-  .btn:hover { filter: brightness(1.12); }
+  .btn:hover { filter: brightness(1.1); box-shadow: 0 10px 30px rgba(250, 63, 148, .38), 0 3px 12px rgba(59, 79, 240, .3); }
   .btn:active { transform: scale(.97); }
   .btn-lg { font-size: var(--t-md); min-height: 54px; padding: 0 var(--s6); }
-  .btn-ghost { background: none; border: 1px solid var(--outline-strong); color: var(--on-surface); }
-  .btn-ghost:hover { background: var(--surface-card); filter: none; }
+  .btn-ghost {
+    background: none; border: 1px solid var(--outline-strong); color: var(--on-surface);
+    box-shadow: none;
+  }
+  .btn-ghost:hover { background: var(--surface-card); filter: none; box-shadow: none; }
 
   /* ---------- hero ---------- */
   .hero { padding: clamp(var(--s6), 7vw, var(--s8)) 0 clamp(var(--s5), 5vw, var(--s7)); position: relative; }
+  /* Two-tone brand wash: warm on the copy side, cool under the phone. */
   .hero::before {
-    content: ""; position: absolute; inset: -20% 30% 40% -20%;
-    background: radial-gradient(closest-side, rgba(123, 108, 255, .18), transparent);
+    /* Right inset stays at 0: a negative one bleeds past the viewport and
+       gives the whole page a horizontal scrollbar. */
+    content: ""; position: absolute; inset: -30% 0 20% -20%;
+    background:
+      radial-gradient(38% 55% at 18% 30%, rgba(250, 63, 148, .16), transparent 70%),
+      radial-gradient(42% 60% at 78% 55%, rgba(59, 79, 240, .20), transparent 72%);
     pointer-events: none; z-index: var(--z-base);
   }
   .hero .wrap {
@@ -211,25 +230,38 @@
     color: var(--on-surface-muted);
     border: 1px solid var(--outline); border-radius: var(--r-pill);
     padding: var(--s1) var(--s3); margin-bottom: var(--s4);
+    background: var(--surface-card);
   }
+  .eyedot { width: 6px; height: 6px; border-radius: 50%; background: var(--brand-amber); flex: none; }
   .lede { font-size: var(--t-lg); color: var(--on-surface-muted); max-width: 34rem; }
   .hero-cta { display: flex; gap: var(--s3); flex-wrap: wrap; margin-top: var(--s5); }
   .fineprint { font-size: var(--t-sm); color: var(--on-surface-muted); margin-top: var(--s4); }
 
   /* ---------- phone ---------- */
-  .phone-stage { display: flex; justify-content: center; }
+  .phone-stage { display: flex; justify-content: center; position: relative; }
+  /* The phone screen is the same near-black as the page, so it needs its own
+     halo to read as an object rather than a hole. */
+  .phone-stage::before {
+    content: ""; position: absolute; z-index: var(--z-base);
+    width: 74%; aspect-ratio: 1; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    background: radial-gradient(closest-side, rgba(252, 98, 199, .22), rgba(59, 79, 240, .12) 55%, transparent 75%);
+    filter: blur(18px); pointer-events: none;
+  }
   .phone {
     width: 300px; max-width: 84vw;
-    background: var(--surface-sunken);
-    border: 9px solid #12151f;
+    background: #0d1018;
+    border: 9px solid #171b26;
     border-radius: 42px;
     padding: var(--s2) var(--s2) var(--s3);
-    box-shadow: 0 40px 80px rgba(0, 0, 0, .55), 0 0 0 1px rgba(255, 255, 255, .05);
-    position: relative;
+    box-shadow:
+      0 40px 90px rgba(0, 0, 0, .7),
+      0 0 0 1px rgba(255, 255, 255, .09),
+      inset 0 1px 0 rgba(255, 255, 255, .10);
+    position: relative; z-index: var(--z-raised);
   }
   .notch {
     position: absolute; top: 6px; left: 50%; transform: translateX(-50%);
-    width: 96px; height: 18px; background: #12151f; border-radius: 0 0 12px 12px;
+    width: 96px; height: 18px; background: #171b26; border-radius: 0 0 12px 12px;
     z-index: var(--z-raised);
   }
   .screen {
@@ -247,7 +279,7 @@
 
   .chips { display: flex; gap: var(--s2); justify-content: center; margin-top: var(--s2); }
   .chip {
-    background: var(--app-bg); border-radius: var(--r-pill); padding: 3px 9px;
+    background: var(--app-chip); border-radius: var(--r-pill); padding: 3px 9px;
     font-size: 10px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;
     color: var(--app-text); white-space: nowrap;
   }
@@ -278,16 +310,23 @@
 
   .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: var(--s4); }
   .feature {
+    position: relative;
     background: var(--surface-card); border: 1px solid var(--outline);
     border-radius: var(--r-lg); padding: var(--s5);
-    transition: border-color var(--dur) var(--ease), transform var(--dur) var(--ease);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .045);
+    transition: border-color var(--dur) var(--ease), transform var(--dur) var(--ease),
+                box-shadow var(--dur) var(--ease);
   }
-  .feature:hover { border-color: var(--outline-strong); transform: translateY(-2px); }
+  .feature:hover {
+    border-color: var(--outline-strong); transform: translateY(-2px);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .07), 0 12px 28px rgba(0, 0, 0, .35);
+  }
   .feature .ico {
     display: inline-flex; align-items: center; justify-content: center;
     width: 44px; height: 44px; border-radius: var(--r-md);
-    background: var(--surface-raised); border: 1px solid var(--outline);
-    color: var(--brand-blue); margin-bottom: var(--s3);
+    background: linear-gradient(145deg, rgba(250, 63, 148, .16), rgba(59, 79, 240, .16));
+    border: 1px solid var(--outline-strong);
+    color: var(--brand-link); margin-bottom: var(--s3);
   }
   .feature p { color: var(--on-surface-muted); font-size: var(--t-sm); margin-bottom: 0; }
 
@@ -388,7 +427,7 @@
 <header class="hero" id="top">
   <div class="wrap">
     <div class="hero-copy">
-      <span class="eyebrow">Free · Android 8.0+</span>
+      <span class="eyebrow"><span class="eyedot" aria-hidden="true"></span>Free · Android 8.0+</span>
       <h1>Measure noise in <span class="grad">decibels</span>.</h1>
       <p class="lede">
         Turn your phone into a sound level meter. See how loud a room really is,
