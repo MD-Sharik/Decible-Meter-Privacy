@@ -3,7 +3,18 @@
     "allow": [
       "PowerShell($env:JAVA_HOME=\"C:\\\\Program Files\\\\Android\\\\Android Studio\\\\jbr\"; & \"C:\\\\Users\\\\sharik\\\\.gradle\\\\wrapper\\\\dists\\\\gradle-8.7-bin\\\\bhs2wmbdwecv87pi65oeuq5iu\\\\gradle-8.7\\\\bin\\\\gradle.bat\" -p \"C:\\\\Users\\\\sharik\\\\Desktop\\\\MobileApps\\\\New folder\" :app:processDebugResources --console=plain)",
       "PowerShell(Get-ChildItem \"C:\\\\Program Files\\\\Java\",\"C:\\\\Program Files\\\\Eclipse Adoptium\",\"$env:LOCALAPPDATA\\\\Programs\\\\Eclipse Adoptium\",\"C:\\\\Program Files\\\\Microsoft\" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName; \"--- studio jbr version ---\"; & \"C:\\\\Program Files\\\\Android\\\\Android Studio\\\\jbr\\\\bin\\\\java.exe\" -version)",
-      "PowerShell($env:JAVA_HOME=\"C:\\\\Users\\\\sharik\\\\.jdks\\\\jbr-21.0.11\"; & \"C:\\\\Users\\\\sharik\\\\.gradle\\\\wrapper\\\\dists\\\\gradle-8.7-bin\\\\bhs2wmbdwecv87pi65oeuq5iu\\\\gradle-8.7\\\\bin\\\\gradle.bat\" -p \"C:\\\\Users\\\\sharik\\\\Desktop\\\\MobileApps\\\\New folder\" :app:assembleDebug --console=plain)"
+      "PowerShell($env:JAVA_HOME=\"C:\\\\Users\\\\sharik\\\\.jdks\\\\jbr-21.0.11\"; & \"C:\\\\Users\\\\sharik\\\\.gradle\\\\wrapper\\\\dists\\\\gradle-8.7-bin\\\\bhs2wmbdwecv87pi65oeuq5iu\\\\gradle-8.7\\\\bin\\\\gradle.bat\" -p \"C:\\\\Users\\\\sharik\\\\Desktop\\\\MobileApps\\\\New folder\" :app:assembleDebug --console=plain)",
+      "WebSearch",
+      "PowerShell(ssh -i \"$env:USERPROFILE\\\\.ssh\\\\entgpt1_ed25519\" -o BatchMode=yes azureuser@20.207.202.178 'echo \"--- .xsession ---\"; cat -A ~/.xsession; echo \"--- polkit ---\"; cat /etc/polkit-1/rules.d/02-allow-colord.rules; echo \"--- groups ---\"; groups xrdp')",
+      "PowerShell(ssh -i \"$env:USERPROFILE\\\\.ssh\\\\entgpt1_ed25519\" -o BatchMode=yes azureuser@20.207.202.178 'sudo cat -A /etc/polkit-1/rules.d/02-allow-colord.rules')",
+      "PowerShell(ssh -i \"$env:USERPROFILE\\\\.ssh\\\\entgpt1_ed25519\" -o BatchMode=yes -N -L 3390:localhost:3389 azureuser@20.207.202.178)",
+      "PowerShell(Start-Sleep -Seconds 2; $t = Test-NetConnection -ComputerName localhost -Port 3390 -WarningAction SilentlyContinue; \"TCP 3390 open: $\\($t.TcpTestSucceeded\\)\")",
+      "PowerShell(Start-Process mstsc -ArgumentList \"/v:localhost:3390\")",
+      "PowerShell(\"mstsc launched\")",
+      "PowerShell(ssh -i \"$env:USERPROFILE\\\\.ssh\\\\entgpt1_ed25519\" -o BatchMode=yes azureuser@20.207.202.178 'echo ===SESMAN===; sudo tail -40 /var/log/xrdp-sesman.log; echo ===XRDP===; sudo tail -20 /var/log/xrdp.log; echo ===XSESSIONERRORS===; tail -30 ~/.xsession-errors 2>/dev/null || echo none; echo ===HOME===; ls -la ~/')",
+      "mcp__visualize__read_me",
+      "PowerShell(Copy-Item \"C:\\\\Users\\\\sharik\\\\Desktop\\\\MobileApps\\\\New folder\\\\Icon.png\" \"C:\\\\Users\\\\sharik\\\\Desktop\\\\MobileApps\\\\New folder\\\\docs\\\\icon-512.png\" -Force)",
+      "Bash(awk '{print length\\($0\\)-30\" chars\"}')"
     ]
   }
 }
