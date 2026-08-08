@@ -6,18 +6,20 @@
 
 <title>Sound Meter: dB Decibel — Measure Noise in Decibels on Android</title>
 <meta name="description" content="Free Android sound level meter. Measure noise in decibels in real time, see a live dB graph, and compare readings to everyday sounds.">
-<link rel="canonical" href="https://REPLACE-WITH-YOUR-DOMAIN/">
+<link rel="canonical" href="https://decibel.nouvous.com/">
 
 <meta property="og:type" content="website">
+<meta property="og:site_name" content="Decibel by NOUVOUS">
 <meta property="og:title" content="Sound Meter: dB Decibel — Measure Noise in Decibels">
-<meta property="og:description" content="Free Android sound level meter. Real-time decibel readings, live graph, and a reference chart for everyday sounds.">
-<meta property="og:image" content="https://REPLACE-WITH-YOUR-DOMAIN/icon-512.png">
-<meta property="og:url" content="https://REPLACE-WITH-YOUR-DOMAIN/">
+<meta property="og:description" content="Free Android sound level meter. Real-time decibel readings, a live graph, and a reference chart for everyday sounds.">
+<meta property="og:image" content="https://decibel.nouvous.com/icon-512.png">
+<meta property="og:url" content="https://decibel.nouvous.com/">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#060a17">
 
-<link rel="icon" href="icon-512.png" type="image/png">
-<link rel="apple-touch-icon" href="icon-512.png">
+<link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="favicon-192.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 
 <script type="application/ld+json">
 {
@@ -27,28 +29,42 @@
   "applicationCategory": "UtilitiesApplication",
   "operatingSystem": "Android 8.0 and up",
   "description": "A sound level meter for Android. Measures ambient noise in decibels in real time, plots a live graph, and compares readings against a reference chart of everyday sounds.",
-  "url": "https://REPLACE-WITH-YOUR-DOMAIN/",
+  "url": "https://decibel.nouvous.com/",
   "downloadUrl": "https://play.google.com/store/apps/details?id=com.sharik.dbmeter",
   "installUrl": "https://play.google.com/store/apps/details?id=com.sharik.dbmeter",
-  "image": "https://REPLACE-WITH-YOUR-DOMAIN/icon-512.png",
-  "publisher": { "@type": "Organization", "name": "NOUVOUS" },
+  "image": "https://decibel.nouvous.com/icon-512.png",
+  "publisher": { "@type": "Organization", "name": "NOUVOUS", "url": "https://decibel.nouvous.com/" },
   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
 }
 </script>
 
 <style>
   :root {
-    --bg:      #060a17;
-    --bg-2:    #0b1120;
-    --card:    #111725;
-    --rule:    #1d2434;
-    --text:    #f2f4f8;
-    --muted:   #8b92a3;
-    --pink:    #ff3b8e;
-    --violet:  #7b6cff;
-    --blue:    #3ba3ff;
+    /* ---- surface + content tokens (semantic, not raw hex at point of use) ---- */
+    --surface:        #060a17;
+    --surface-sunken: #04070f;
+    --surface-raised: #0b1120;
+    --surface-card:   #111725;
+    --outline:        #1d2434;
+    --outline-strong: #2a3242;
+    --on-surface:         #f2f4f8;
+    --on-surface-muted:   #99a1b3;
+    --on-brand:           #ffffff;
 
-    /* The phone mock reproduces the app's light theme. */
+    --brand-pink:   #ff3b8e;
+    --brand-violet: #7b6cff;
+    --brand-blue:   #56aeff;
+    --brand-grad: linear-gradient(100deg, var(--brand-pink), var(--brand-violet) 55%, var(--brand-blue));
+    --focus: #8fb8ff;
+
+    /* ---- loudness ramp, shared with the app ---- */
+    --lvl-quiet:    #2ecc40;
+    --lvl-moderate: #a8db1e;
+    --lvl-loud:     #ffc300;
+    --lvl-vloud:    #ff8a00;
+    --lvl-danger:   #ff3b30;
+
+    /* ---- the phone mock reproduces the app's light theme ---- */
     --app-bg:    #f0f0f3;
     --app-card:  #ffffff;
     --app-text:  #1c1c1e;
@@ -56,6 +72,25 @@
     --app-track: #d9d9de;
     --app-tick:  #c7c7cc;
     --app-grid:  #e5e5ea;
+    --app-line:  #e2e2e6;
+
+    /* ---- 4px spacing scale ---- */
+    --s1: 4px;  --s2: 8px;  --s3: 12px; --s4: 16px;
+    --s5: 24px; --s6: 32px; --s7: 48px; --s8: 64px;
+
+    /* ---- radius scale ---- */
+    --r-sm: 8px; --r-md: 12px; --r-lg: 16px; --r-xl: 24px; --r-pill: 999px;
+
+    /* ---- z-index scale ---- */
+    --z-base: 0; --z-raised: 10; --z-nav: 40; --z-skip: 100;
+
+    /* ---- motion ---- */
+    --dur: 180ms;
+    --ease: cubic-bezier(.4, 0, .2, 1);
+
+    /* ---- type scale: 12 14 16 18 24 32 ---- */
+    --t-xs: .75rem; --t-sm: .875rem; --t-md: 1rem;
+    --t-lg: 1.125rem; --t-xl: 1.5rem; --t-2xl: 2rem;
   }
 
   * { box-sizing: border-box; }
@@ -63,186 +98,281 @@
 
   body {
     margin: 0;
-    background: var(--bg);
-    color: var(--text);
+    background: var(--surface);
+    color: var(--on-surface);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
                  "Helvetica Neue", Arial, sans-serif;
-    font-size: 17px;
-    line-height: 1.65;
+    font-size: var(--t-md);
+    line-height: 1.6;
     overflow-x: hidden;
   }
 
-  .wrap { max-width: 68rem; margin: 0 auto; padding: 0 1.25rem; }
+  .wrap { max-width: 68rem; margin: 0 auto; padding: 0 var(--s4); }
 
-  h1, h2, h3 { letter-spacing: -.025em; line-height: 1.15; margin: 0 0 .75rem; }
-  h1 { font-size: clamp(2.1rem, 5.5vw, 3.4rem); }
-  h2 { font-size: clamp(1.5rem, 3.4vw, 2.1rem); }
-  h3 { font-size: 1.05rem; letter-spacing: -.01em; }
-  p  { margin: 0 0 1rem; }
+  h1, h2, h3 { letter-spacing: -.025em; line-height: 1.15; margin: 0 0 var(--s3); }
+  h1 { font-size: clamp(2rem, 5.5vw, 3.25rem); font-weight: 800; }
+  h2 { font-size: clamp(1.5rem, 3.4vw, 2rem); font-weight: 700; }
+  h3 { font-size: var(--t-lg); font-weight: 650; letter-spacing: -.01em; }
+  p  { margin: 0 0 var(--s4); max-width: 68ch; }
 
-  a { color: var(--blue); }
+  a { color: var(--brand-blue); }
 
-  .grad {
-    background: linear-gradient(100deg, var(--pink), var(--violet) 55%, var(--blue));
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+  /* Visible focus on every interactive element (never removed). */
+  :focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 3px;
+    border-radius: var(--r-sm);
   }
+
+  .skip {
+    position: absolute; left: var(--s4); top: calc(-1 * var(--s8));
+    z-index: var(--z-skip);
+    background: var(--surface-card); color: var(--on-surface);
+    border: 1px solid var(--outline-strong); border-radius: var(--r-sm);
+    padding: var(--s3) var(--s4); text-decoration: none;
+    transition: top var(--dur) var(--ease);
+  }
+  .skip:focus { top: var(--s4); }
+
+  /* Solid brand colour first, so the word is never invisible if the browser
+     does not support clipping a background to text. */
+  .grad { color: var(--brand-violet); }
+  @supports ((-webkit-background-clip: text) or (background-clip: text)) {
+    .grad {
+      background: var(--brand-grad);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+  }
+
+  .icon { width: 24px; height: 24px; flex: none; stroke: currentColor; fill: none;
+          stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
 
   /* ---------- nav ---------- */
   nav {
-    position: sticky; top: 0; z-index: 20;
-    background: rgba(6,10,23,.82);
+    position: sticky; top: 0; z-index: var(--z-nav);
+    background: rgba(6, 10, 23, .85);
     backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--rule);
+    border-bottom: 1px solid var(--outline);
   }
-  nav .wrap { display: flex; align-items: center; gap: 1rem; height: 62px; }
-  .brand { display: flex; align-items: center; gap: .6rem; font-weight: 700; text-decoration: none; color: var(--text); }
-  .brand img { width: 30px; height: 30px; border-radius: 8px; }
-  .navlinks { margin-left: auto; display: flex; gap: 1.5rem; align-items: center; }
-  .navlinks a { color: var(--muted); text-decoration: none; font-size: .93rem; }
-  .navlinks a:hover { color: var(--text); }
-  @media (max-width: 720px) { .navlinks a.hide-sm { display: none; } }
+  nav .wrap { display: flex; align-items: center; gap: var(--s4); min-height: 64px; }
+  .brand {
+    display: flex; align-items: center; gap: var(--s2);
+    font-weight: 700; text-decoration: none; color: var(--on-surface);
+    min-height: 44px; touch-action: manipulation;
+  }
+  .brand img { width: 32px; height: 32px; border-radius: var(--r-sm); }
+  .navlinks { margin-left: auto; display: flex; gap: var(--s2); align-items: center; }
+  .navlinks a {
+    color: var(--on-surface-muted); text-decoration: none; font-size: var(--t-sm);
+    display: inline-flex; align-items: center;
+    min-height: 44px; padding: 0 var(--s3); border-radius: var(--r-sm);
+    transition: color var(--dur) var(--ease), background var(--dur) var(--ease);
+    touch-action: manipulation;
+  }
+  .navlinks a:hover { color: var(--on-surface); background: var(--surface-card); }
+  @media (max-width: 760px) { .navlinks a.hide-sm { display: none; } }
 
   .btn {
-    display: inline-block;
-    background: linear-gradient(100deg, var(--pink), var(--violet) 60%, var(--blue));
-    color: #fff; text-decoration: none; font-weight: 650; font-size: .95rem;
-    padding: .62rem 1.15rem; border-radius: 50px; white-space: nowrap;
+    display: inline-flex; align-items: center; justify-content: center; gap: var(--s2);
+    min-height: 48px; padding: 0 var(--s5);
+    background: var(--brand-grad); color: var(--on-brand);
+    text-decoration: none; font-weight: 650; font-size: var(--t-sm);
+    border-radius: var(--r-pill); white-space: nowrap; cursor: pointer;
+    touch-action: manipulation;
+    transition: transform var(--dur) var(--ease), filter var(--dur) var(--ease);
   }
-  .btn:hover { filter: brightness(1.1); }
-  .btn-lg { font-size: 1.02rem; padding: .85rem 1.7rem; }
-  .btn-ghost {
-    background: none; border: 1px solid var(--rule); color: var(--text);
-  }
+  .btn:hover { filter: brightness(1.12); }
+  .btn:active { transform: scale(.97); }
+  .btn-lg { font-size: var(--t-md); min-height: 54px; padding: 0 var(--s6); }
+  .btn-ghost { background: none; border: 1px solid var(--outline-strong); color: var(--on-surface); }
+  .btn-ghost:hover { background: var(--surface-card); filter: none; }
 
   /* ---------- hero ---------- */
-  .hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 clamp(2rem, 5vw, 4rem); position: relative; }
+  .hero { padding: clamp(var(--s6), 7vw, var(--s8)) 0 clamp(var(--s5), 5vw, var(--s7)); position: relative; }
   .hero::before {
     content: ""; position: absolute; inset: -20% 30% 40% -20%;
-    background: radial-gradient(closest-side, rgba(123,108,255,.20), transparent);
-    pointer-events: none;
+    background: radial-gradient(closest-side, rgba(123, 108, 255, .18), transparent);
+    pointer-events: none; z-index: var(--z-base);
   }
-  .hero .wrap { display: grid; grid-template-columns: 1.05fr .95fr; gap: 3rem; align-items: center; position: relative; }
+  .hero .wrap {
+    display: grid; grid-template-columns: 1.05fr .95fr; gap: var(--s7);
+    align-items: center; position: relative; z-index: var(--z-raised);
+  }
   @media (max-width: 900px) {
-    .hero .wrap { grid-template-columns: 1fr; gap: 2.5rem; }
+    .hero .wrap { grid-template-columns: 1fr; gap: var(--s6); }
     .hero-copy { text-align: center; }
+    .hero-copy p { margin-inline: auto; }
     .hero-cta { justify-content: center; }
   }
 
   .eyebrow {
-    display: inline-block; font-size: .8rem; font-weight: 650; letter-spacing: .08em;
-    text-transform: uppercase; color: var(--muted);
-    border: 1px solid var(--rule); border-radius: 50px; padding: .3rem .8rem; margin-bottom: 1.1rem;
+    display: inline-flex; align-items: center; gap: var(--s2);
+    font-size: var(--t-xs); font-weight: 650; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--on-surface-muted);
+    border: 1px solid var(--outline); border-radius: var(--r-pill);
+    padding: var(--s1) var(--s3); margin-bottom: var(--s4);
   }
-  .lede { font-size: 1.12rem; color: var(--muted); max-width: 34rem; }
-  .hero-cta { display: flex; gap: .75rem; flex-wrap: wrap; margin-top: 1.6rem; }
-  .fineprint { font-size: .85rem; color: var(--muted); margin-top: 1rem; }
+  .lede { font-size: var(--t-lg); color: var(--on-surface-muted); max-width: 34rem; }
+  .hero-cta { display: flex; gap: var(--s3); flex-wrap: wrap; margin-top: var(--s5); }
+  .fineprint { font-size: var(--t-sm); color: var(--on-surface-muted); margin-top: var(--s4); }
 
   /* ---------- phone ---------- */
   .phone-stage { display: flex; justify-content: center; }
   .phone {
     width: 300px; max-width: 84vw;
-    background: #05070f;
+    background: var(--surface-sunken);
     border: 9px solid #12151f;
     border-radius: 42px;
-    padding: 8px 8px 12px;
-    box-shadow: 0 40px 80px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.05);
+    padding: var(--s2) var(--s2) var(--s3);
+    box-shadow: 0 40px 80px rgba(0, 0, 0, .55), 0 0 0 1px rgba(255, 255, 255, .05);
     position: relative;
   }
   .notch {
     position: absolute; top: 6px; left: 50%; transform: translateX(-50%);
-    width: 96px; height: 18px; background: #12151f; border-radius: 0 0 12px 12px; z-index: 3;
+    width: 96px; height: 18px; background: #12151f; border-radius: 0 0 12px 12px;
+    z-index: var(--z-raised);
   }
   .screen {
     background: var(--app-bg); border-radius: 32px; overflow: hidden;
-    padding: 26px 10px 10px; color: var(--app-text);
+    padding: var(--s6) var(--s3) var(--s3); color: var(--app-text);
   }
-  .app-card { background: var(--app-card); border-radius: 16px; padding: 10px 10px 12px; }
+  .app-card { background: var(--app-card); border-radius: var(--r-lg); padding: var(--s3) var(--s3) var(--s3); }
 
-  .readout { text-align: center; margin-top: -4px; }
+  #gauge { display: block; width: 100%; aspect-ratio: 200 / 118; }
+  #chart { display: block; width: 100%; aspect-ratio: 300 / 130; }
+
+  .readout { text-align: center; font-variant-numeric: tabular-nums; }
   .readout .val { font-size: 2.1rem; font-weight: 800; letter-spacing: -.03em; line-height: 1; }
-  .readout .unit { font-size: 1rem; font-weight: 700; margin-left: 2px; }
+  .readout .unit { font-size: var(--t-md); font-weight: 700; margin-left: 2px; }
 
-  .chips { display: flex; gap: 6px; justify-content: center; margin-top: 8px; }
+  .chips { display: flex; gap: var(--s2); justify-content: center; margin-top: var(--s2); }
   .chip {
-    background: var(--app-bg); border-radius: 50px; padding: 3px 9px;
-    font-size: .6rem; font-weight: 600; display: flex; align-items: center; gap: 5px;
+    background: var(--app-bg); border-radius: var(--r-pill); padding: 3px 9px;
+    font-size: 10px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;
     color: var(--app-text); white-space: nowrap;
   }
-  .chip .dot { width: 6px; height: 6px; border-radius: 50%; background: #2ecc40; }
+  .chip .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--lvl-quiet); }
   .chip.muted { color: var(--app-muted); }
 
-  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; margin-top: 9px; }
-  .stat { background: var(--app-card); border-radius: 12px; padding: 8px 4px; text-align: center; }
-  .stat b { display: block; font-size: .82rem; letter-spacing: -.02em; }
-  .stat span { font-size: .54rem; font-weight: 600; color: var(--app-muted); letter-spacing: .04em; }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; margin-top: var(--s2); }
+  .stat { background: var(--app-card); border-radius: var(--r-md); padding: var(--s2) var(--s1); text-align: center; }
+  .stat b { display: block; font-size: 13px; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+  .stat span { font-size: 9px; font-weight: 600; color: var(--app-muted); letter-spacing: .04em; }
 
-  .chartcard { background: var(--app-card); border-radius: 16px; padding: 9px; margin-top: 9px; }
+  .chartcard { background: var(--app-card); border-radius: var(--r-lg); padding: 9px; margin-top: var(--s2); }
 
-  .controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; margin-top: 9px; }
+  .controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; margin-top: var(--s2); }
   .ctl {
-    border-radius: 50px; text-align: center; font-size: .64rem; font-weight: 700;
-    padding: 8px 0; border: 1px solid #e2e2e6; color: var(--app-text);
+    border-radius: var(--r-pill); text-align: center; font-size: 10px; font-weight: 700;
+    padding: var(--s2) 0; border: 1px solid var(--app-line); color: var(--app-text);
   }
-  .ctl.primary { background: #1c1c1e; color: #fff; border-color: #1c1c1e; }
+  .ctl.primary { background: var(--app-text); color: var(--app-card); border-color: var(--app-text); }
 
-  .caption { text-align: center; color: var(--muted); font-size: .82rem; margin-top: 1rem; }
+  .caption { text-align: center; color: var(--on-surface-muted); font-size: var(--t-sm); margin: var(--s4) auto 0; }
 
   /* ---------- sections ---------- */
-  section { padding: clamp(3rem, 7vw, 5rem) 0; }
-  section.alt { background: var(--bg-2); border-block: 1px solid var(--rule); }
-  .section-head { max-width: 42rem; margin-bottom: 2.5rem; }
-  .section-head p { color: var(--muted); margin-bottom: 0; }
+  section { padding: clamp(var(--s7), 7vw, var(--s8)) 0; }
+  section.alt { background: var(--surface-raised); border-block: 1px solid var(--outline); }
+  .section-head { max-width: 42rem; margin-bottom: var(--s6); }
+  .section-head p { color: var(--on-surface-muted); margin-bottom: 0; }
 
-  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; }
-  .feature { background: var(--card); border: 1px solid var(--rule); border-radius: 16px; padding: 1.5rem; }
-  .feature .ico { font-size: 1.5rem; line-height: 1; margin-bottom: .7rem; display: block; }
-  .feature p { color: var(--muted); font-size: .95rem; margin-bottom: 0; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: var(--s4); }
+  .feature {
+    background: var(--surface-card); border: 1px solid var(--outline);
+    border-radius: var(--r-lg); padding: var(--s5);
+    transition: border-color var(--dur) var(--ease), transform var(--dur) var(--ease);
+  }
+  .feature:hover { border-color: var(--outline-strong); transform: translateY(-2px); }
+  .feature .ico {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 44px; height: 44px; border-radius: var(--r-md);
+    background: var(--surface-raised); border: 1px solid var(--outline);
+    color: var(--brand-blue); margin-bottom: var(--s3);
+  }
+  .feature p { color: var(--on-surface-muted); font-size: var(--t-sm); margin-bottom: 0; }
 
   /* ---------- reference table ---------- */
-  .tablewrap { overflow-x: auto; border: 1px solid var(--rule); border-radius: 16px; background: var(--card); }
-  table { width: 100%; border-collapse: collapse; font-size: .95rem; min-width: 30rem; }
-  th, td { text-align: left; padding: .7rem 1rem; border-bottom: 1px solid var(--rule); }
-  thead th { font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 650; }
+  .tablewrap { overflow-x: auto; border: 1px solid var(--outline); border-radius: var(--r-lg); background: var(--surface-card); }
+  table { width: 100%; border-collapse: collapse; font-size: var(--t-sm); min-width: 30rem; }
+  th, td { text-align: left; padding: var(--s3) var(--s4); border-bottom: 1px solid var(--outline); }
+  thead th { font-size: var(--t-xs); letter-spacing: .06em; text-transform: uppercase; color: var(--on-surface-muted); font-weight: 650; }
   tbody tr:last-child td { border-bottom: 0; }
-  .sw { display: inline-block; width: 34px; height: 12px; border-radius: 3px; vertical-align: middle; }
+  .sw { display: inline-block; width: 34px; height: 12px; border-radius: 3px; vertical-align: middle; margin-right: var(--s2); }
   td.db { font-variant-numeric: tabular-nums; font-weight: 650; white-space: nowrap; }
 
   /* ---------- faq ---------- */
   details {
-    border: 1px solid var(--rule); border-radius: 14px; background: var(--card);
-    padding: 1rem 1.25rem; margin-bottom: .75rem;
+    border: 1px solid var(--outline); border-radius: var(--r-md); background: var(--surface-card);
+    padding: var(--s4) var(--s5); margin-bottom: var(--s3);
+    transition: background var(--dur) var(--ease);
   }
-  details[open] { background: var(--bg-2); }
-  summary { cursor: pointer; font-weight: 650; list-style: none; }
+  details[open] { background: var(--surface-raised); }
+  summary {
+    cursor: pointer; font-weight: 650; list-style: none;
+    display: flex; align-items: center; gap: var(--s3);
+    min-height: 44px; touch-action: manipulation;
+  }
   summary::-webkit-details-marker { display: none; }
-  summary::after { content: "+"; float: right; color: var(--muted); font-weight: 400; }
-  details[open] summary::after { content: "\2212"; }
-  details p { color: var(--muted); margin: .85rem 0 0; font-size: .95rem; }
+  summary .chev { margin-left: auto; color: var(--on-surface-muted); transition: transform var(--dur) var(--ease); }
+  details[open] summary .chev { transform: rotate(180deg); }
+  details p { color: var(--on-surface-muted); margin: var(--s3) 0 0; font-size: var(--t-sm); }
 
   /* ---------- cta + footer ---------- */
   .cta-band { text-align: center; }
-  .cta-band .btn { margin-top: .5rem; }
+  .cta-band .lede { margin: 0 auto var(--s4); }
 
-  footer { border-top: 1px solid var(--rule); padding: 2.5rem 0; color: var(--muted); font-size: .9rem; }
-  .footrow { display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: center; }
-  footer a { color: var(--muted); }
+  footer { border-top: 1px solid var(--outline); padding: var(--s7) 0; color: var(--on-surface-muted); font-size: var(--t-sm); }
+  .footrow { display: flex; flex-wrap: wrap; gap: var(--s3) var(--s5); align-items: center; }
+  footer a { color: var(--on-surface-muted); min-height: 44px; display: inline-flex; align-items: center; }
+  footer a:hover { color: var(--on-surface); }
   footer .spacer { margin-left: auto; }
 
   .visually-hidden {
     position: absolute; width: 1px; height: 1px; overflow: hidden;
     clip: rect(0 0 0 0); white-space: nowrap;
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after {
+      animation-duration: .01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: .01ms !important;
+    }
+  }
 </style>
 </head>
 <body>
 
+<a class="skip" href="#main">Skip to content</a>
+
+<!-- Icon sprite: one set, one stroke weight (Lucide geometry). -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+  <symbol id="i-sliders" viewBox="0 0 24 24">
+    <path d="M21 4h-7M10 4H3M21 12h-9M8 12H3M21 20h-5M12 20H3M14 2v4M8 10v4M16 18v4"/>
+  </symbol>
+  <symbol id="i-activity" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></symbol>
+  <symbol id="i-bars" viewBox="0 0 24 24"><path d="M12 20V10M18 20V4M6 20v-4"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24">
+    <path d="M12 7v14"/>
+    <path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/>
+  </symbol>
+  <symbol id="i-target" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/>
+    <path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
+  </symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24">
+    <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>
+    <path d="m9 12 2 2 4-4"/>
+  </symbol>
+  <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+</defs></svg>
+
 <nav>
   <div class="wrap">
     <a class="brand" href="#top">
-      <img src="icon-512.png" alt="Sound Meter app icon" width="30" height="30">
-      Sound&nbsp;Meter
+      <img src="favicon-192.png" alt="Decibel app icon" width="32" height="32">
+      Decibel
     </a>
     <div class="navlinks">
       <a href="#features" class="hide-sm">Features</a>
@@ -252,6 +382,8 @@
     </div>
   </div>
 </nav>
+
+<main id="main">
 
 <header class="hero" id="top">
   <div class="wrap">
@@ -271,12 +403,12 @@
     </div>
 
     <div class="phone-stage">
-      <div class="phone" role="img" aria-label="Animated preview of the Sound Meter app: a dial needle rising and falling with a live decibel graph">
+      <div class="phone" role="img" aria-label="Animated preview of the Decibel app: the dial needle rises and falls with the noise level while a live graph draws underneath">
         <div class="notch"></div>
         <div class="screen">
 
           <div class="app-card">
-            <svg id="gauge" viewBox="0 0 200 118" width="100%" aria-hidden="true">
+            <svg id="gauge" viewBox="0 0 200 118" aria-hidden="true" focusable="false">
               <defs>
                 <linearGradient id="ramp" x1="12" y1="0" x2="188" y2="0" gradientUnits="userSpaceOnUse">
                   <stop offset="0"    stop-color="#2ECC40"/>
@@ -317,7 +449,7 @@
           </div>
 
           <div class="chartcard">
-            <svg id="chart" viewBox="0 0 300 130" width="100%" aria-hidden="true">
+            <svg id="chart" viewBox="0 0 300 130" aria-hidden="true" focusable="false">
               <g id="grid"></g>
               <polyline id="line" fill="none" stroke="#4CD137" stroke-width="2.4"
                         stroke-linecap="round" stroke-linejoin="round" points=""/>
@@ -334,7 +466,7 @@
       </div>
     </div>
   </div>
-  <p class="caption">A simulation of the app running &mdash; no microphone is used on this page.</p>
+  <p class="caption">A simulation of the app running &mdash; this page never uses your microphone.</p>
 </header>
 
 <section id="features">
@@ -344,36 +476,36 @@
       <p>Built to answer one question quickly: how loud is it here, right now?</p>
     </div>
     <div class="cards">
-      <div class="feature">
-        <span class="ico">🎚️</span>
+      <article class="feature">
+        <span class="ico"><svg class="icon" aria-hidden="true"><use href="#i-sliders"/></svg></span>
         <h3>Real-time decibel readings</h3>
         <p>The dial responds as the room changes, with a colour that shifts from green through amber to red as levels climb.</p>
-      </div>
-      <div class="feature">
-        <span class="ico">📈</span>
+      </article>
+      <article class="feature">
+        <span class="ico"><svg class="icon" aria-hidden="true"><use href="#i-activity"/></svg></span>
         <h3>Live sound graph</h3>
         <p>A rolling 15-second plot of the noise level, so you can see spikes you would otherwise miss.</p>
-      </div>
-      <div class="feature">
-        <span class="ico">📊</span>
+      </article>
+      <article class="feature">
+        <span class="ico"><svg class="icon" aria-hidden="true"><use href="#i-bars"/></svg></span>
         <h3>Min, average and max</h3>
         <p>Every session tracks its quietest point, its loudest, and the average across the whole measurement.</p>
-      </div>
-      <div class="feature">
-        <span class="ico">📖</span>
+      </article>
+      <article class="feature">
+        <span class="ico"><svg class="icon" aria-hidden="true"><use href="#i-book"/></svg></span>
         <h3>Reference chart</h3>
         <p>Compare any reading to fourteen familiar sounds, so a number on screen actually means something.</p>
-      </div>
-      <div class="feature">
-        <span class="ico">🎯</span>
+      </article>
+      <article class="feature">
+        <span class="ico"><svg class="icon" aria-hidden="true"><use href="#i-target"/></svg></span>
         <h3>Adjustable calibration</h3>
         <p>Phone microphones vary by more than 10&nbsp;dB between models. Trim the reading to match a meter you trust, once, and it is remembered.</p>
-      </div>
-      <div class="feature">
-        <span class="ico">🔒</span>
+      </article>
+      <article class="feature">
+        <span class="ico"><svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg></span>
         <h3>Private by design</h3>
         <p>Audio is analysed on your device and discarded immediately. Nothing is recorded, saved or uploaded.</p>
-      </div>
+      </article>
     </div>
   </div>
 </section>
@@ -388,7 +520,7 @@
         This is the reference chart built into the app.
       </p>
     </div>
-    <div class="tablewrap">
+    <div class="tablewrap" tabindex="0" role="region" aria-label="Decibel reference table, scrollable">
       <table>
         <caption class="visually-hidden">Decibel levels of common everyday sounds</caption>
         <thead>
@@ -427,27 +559,27 @@
     <div class="section-head"><h2>Questions</h2></div>
 
     <details open>
-      <summary>Does the app record what I say?</summary>
+      <summary>Does the app record what I say?<svg class="icon chev" aria-hidden="true"><use href="#i-chevron"/></svg></summary>
       <p>No. Audio is analysed in real time to produce a loudness number and then discarded. Nothing is written to storage and nothing is transmitted. There is no speech recognition of any kind.</p>
     </details>
 
     <details>
-      <summary>How accurate is a phone as a sound meter?</summary>
+      <summary>How accurate is a phone as a sound meter?<svg class="icon chev" aria-hidden="true"><use href="#i-chevron"/></svg></summary>
       <p>Close, but not certified. Phone microphones vary between models and are not calibrated instruments, so treat readings as a good approximation. With the calibration setting adjusted against a known reference, most phones land within a few decibels. It is not a substitute for a professional meter where a legal or occupational measurement is required.</p>
     </details>
 
     <details>
-      <summary>What is a safe noise level?</summary>
+      <summary>What is a safe noise level?<svg class="icon chev" aria-hidden="true"><use href="#i-chevron"/></svg></summary>
       <p>As a general guide, sustained exposure above roughly 85&nbsp;dB carries a hearing risk, and the safe exposure time falls sharply as levels rise beyond that. Brief peaks matter less than long exposure. For anything health related, consult the guidance from your national health or occupational safety body.</p>
     </details>
 
     <details>
-      <summary>Does it work without an internet connection?</summary>
+      <summary>Does it work without an internet connection?<svg class="icon chev" aria-hidden="true"><use href="#i-chevron"/></svg></summary>
       <p>Yes. Measuring is entirely local and works offline. A connection is only used to load ads.</p>
     </details>
 
     <details>
-      <summary>Why does it need microphone permission?</summary>
+      <summary>Why does it need microphone permission?<svg class="icon chev" aria-hidden="true"><use href="#i-chevron"/></svg></summary>
       <p>Measuring sound requires reading the microphone &mdash; that is the whole function. You can revoke the permission at any time in Android settings; the app will simply stop measuring.</p>
     </details>
   </div>
@@ -456,10 +588,12 @@
 <section class="cta-band">
   <div class="wrap">
     <h2>Find out how loud it really is</h2>
-    <p class="lede" style="margin: 0 auto 1rem;">Free on Google Play. Android 8.0 and up.</p>
+    <p class="lede">Free on Google Play. Android 8.0 and up.</p>
     <a class="btn btn-lg" href="https://play.google.com/store/apps/details?id=com.sharik.dbmeter">Get it on Google Play</a>
   </div>
 </section>
+
+</main>
 
 <footer>
   <div class="wrap footrow">
@@ -475,20 +609,20 @@
   "use strict";
 
   var REFS = [
-    [140, "Gun shots",     "Immediate pain; damage from a single exposure"],
+    [140, "Gun shots",      "Immediate pain; damage from a single exposure"],
     [130, "Ambulance siren","Painful at close range"],
-    [120, "Thunder",       "Threshold of physical discomfort"],
-    [110, "Concerts",      "Minutes of exposure is enough to harm"],
-    [100, "Subway train",  "Hearing protection recommended"],
-    [90,  "Motorcycle",    "Risky beyond a couple of hours"],
-    [80,  "Busy traffic",  "Loud; conversation gets difficult"],
-    [70,  "Restaurant",    "Noticeably noisy but safe"],
-    [60,  "Conversation",  "Normal speech at a metre"],
-    [50,  "Quiet office",  "Comfortable background level"],
-    [40,  "Quiet library", "Calm; individual sounds stand out"],
-    [30,  "Whisper",       "Very quiet room"],
-    [20,  "Clock ticking", "Near silence"],
-    [10,  "Breathing",     "Barely perceptible"]
+    [120, "Thunder",        "Threshold of physical discomfort"],
+    [110, "Concerts",       "Minutes of exposure is enough to harm"],
+    [100, "Subway train",   "Hearing protection recommended"],
+    [90,  "Motorcycle",     "Risky beyond a couple of hours"],
+    [80,  "Busy traffic",   "Loud; conversation gets difficult"],
+    [70,  "Restaurant",     "Noticeably noisy but safe"],
+    [60,  "Conversation",   "Normal speech at a metre"],
+    [50,  "Quiet office",   "Comfortable background level"],
+    [40,  "Quiet library",  "Calm; individual sounds stand out"],
+    [30,  "Whisper",        "Very quiet room"],
+    [20,  "Clock ticking",  "Near silence"],
+    [10,  "Breathing",      "Barely perceptible"]
   ];
 
   // Same ramp the app uses for the gauge stripe.
@@ -514,14 +648,13 @@
   }
 
   /* ---- reference table ---- */
-  var tbody = document.getElementById("reftable");
-  tbody.innerHTML = REFS.map(function (r) {
+  document.getElementById("reftable").innerHTML = REFS.map(function (r) {
     return '<tr><td class="db"><span class="sw" style="background:' + levelColor(r[0] / 120) +
-           '"></span> ' + r[0] + ' dB</td><td>' + r[1] + '</td><td>' + r[2] + '</td></tr>';
+           '"></span>' + r[0] + ' dB</td><td>' + r[1] + '</td><td>' + r[2] + '</td></tr>';
   }).join("");
 
   /* ---- gauge furniture ---- */
-  var ticks = document.getElementById("ticks"), tickMarkup = "";
+  var tickMarkup = "";
   for (var v = 0; v <= 120; v += 4) {
     var major = v % 20 === 0;
     var a = Math.PI + (v / 120) * Math.PI;
@@ -533,7 +666,7 @@
                   '" stroke="var(--app-tick)" stroke-width="' + (major ? 1.6 : 1) +
                   '" stroke-linecap="round"/>';
   }
-  ticks.innerHTML = tickMarkup;
+  document.getElementById("ticks").innerHTML = tickMarkup;
 
   var gridMarkup = "";
   for (var g = 0; g <= 120; g += 20) {
@@ -547,14 +680,16 @@
 
   /* ---- elements ---- */
   var ARC_LEN = Math.PI * 88;
-  var arc = document.getElementById("arc");
-  var needle = document.getElementById("needle");
-  var hub = document.getElementById("hub");
-  var valEl = document.getElementById("val");
-  var bandEl = document.getElementById("band");
-  var dotEl = document.getElementById("chipdot");
-  var lineEl = document.getElementById("line");
-  var mnEl = document.getElementById("mn"), avEl = document.getElementById("av"), mxEl = document.getElementById("mx");
+  var arc = document.getElementById("arc"),
+      needle = document.getElementById("needle"),
+      hub = document.getElementById("hub"),
+      valEl = document.getElementById("val"),
+      bandEl = document.getElementById("band"),
+      dotEl = document.getElementById("chipdot"),
+      lineEl = document.getElementById("line"),
+      mnEl = document.getElementById("mn"),
+      avEl = document.getElementById("av"),
+      mxEl = document.getElementById("mx");
 
   arc.style.strokeDasharray = ARC_LEN;
   arc.style.strokeDashoffset = ARC_LEN;
@@ -569,22 +704,21 @@
     { target: 38, spread: 3,   ms: 4400 }    // quiet again
   ];
 
-  var POINTS = 75;              // 15 s at 200 ms, same window as the app
+  var POINTS = 75;            // 15 s at 200 ms, same window as the app
   var STEP_MS = 190;
   var db = 42, sceneIdx = 0, sceneUntil = 0, series = [], mn = null, mx = null, sum = 0, n = 0;
 
-  function reset() {
-    series = []; mn = null; mx = null; sum = 0; n = 0; sceneIdx = 0; sceneUntil = 0;
+  function resetSession() {
+    series = []; mn = null; mx = null; sum = 0; n = 0;
   }
 
   function sample(now) {
     if (now > sceneUntil) {
       sceneIdx = (sceneIdx + 1) % SCENES.length;
+      if (sceneIdx === 0) resetSession();
       sceneUntil = now + SCENES[sceneIdx].ms;
-      if (sceneIdx === 0) reset(), sceneUntil = now + SCENES[0].ms;
     }
     var s = SCENES[sceneIdx];
-    // ease toward the scene level, with texture on top
     db += (s.target - db) * 0.16 + (Math.random() - 0.5) * s.spread;
     db = Math.max(12, Math.min(118, db));
 
@@ -596,8 +730,7 @@
   }
 
   function render() {
-    var f = db / 120;
-    var col = levelColor(f);
+    var f = db / 120, col = levelColor(f);
 
     arc.style.strokeDashoffset = ARC_LEN * (1 - f);
     needle.setAttribute("transform", "rotate(" + (-90 + f * 180) + " 100 100)");
@@ -628,15 +761,9 @@
   var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var visible = true, timer = null;
 
-  function tick() {
-    sample(performance.now());
-    render();
-  }
-
   function start() {
     if (timer || reduced) return;
-    sceneUntil = performance.now() + SCENES[sceneIdx].ms;
-    timer = setInterval(tick, STEP_MS);
+    timer = setInterval(function () { sample(performance.now()); render(); }, STEP_MS);
   }
   function stop() {
     if (timer) { clearInterval(timer); timer = null; }
@@ -649,13 +776,12 @@
     mn = 39; mx = 78; sum = 57 * POINTS; n = POINTS;
     render();
   } else {
-    // Prime the graph so it does not start empty.
     for (var p = 0; p < POINTS; p++) sample(performance.now());
     render();
 
     // Start unconditionally, then let the observer pause it when the phone is
-    // scrolled out of view. Waiting for the observer to fire first would leave
-    // the animation dead anywhere it never reports an intersection.
+    // scrolled away. Gating the start on the observer firing would leave the
+    // meter frozen anywhere it never reports an intersection.
     start();
 
     if ("IntersectionObserver" in window) {
@@ -665,7 +791,7 @@
       }, { threshold: 0.15 }).observe(document.querySelector(".phone"));
     }
     document.addEventListener("visibilitychange", function () {
-      document.hidden || !visible ? stop() : start();
+      (document.hidden || !visible) ? stop() : start();
     });
   }
 })();
